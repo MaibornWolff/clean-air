@@ -29,4 +29,11 @@ jobs:
       - name: Install platformio
         run: |
           pip install platformio
-          platformio run -d "$GITHUB_WORKSPACE/firmware"
+          platformio run -d "${GITHUB_WORKSPACE}/firmware"
+          mv "${GITHUB_WORKSPACE}/firmware/.pio/build/esp32/firmware.bin" "${GITHUB_WORKSPACE}/${GITHUB_SHA::8}.bin"
+      # Upload artifact
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: firmware-${GITHUB_SHA::8}.bin
+          path: ${GITHUB_WORKSPACE}/${GITHUB_SHA::8}.bin
