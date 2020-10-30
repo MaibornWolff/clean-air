@@ -18,14 +18,14 @@ CallbackSpeedHandler cbSpeedHandler;
 // Configure the rotary.
 void Rotary::configure(CallbackSpeedHandler speedHandler)
 {
-    Serial.println("Starting to configure rotary.");
+    ESP_LOGI(TAG, "Starting to configure rotary.");
 
     cbSpeedHandler = speedHandler;
 
     pinMode(LED_BUILTIN, OUTPUT);
 
     // Set Rotary default position
-    Serial.println("Set rotary default position");
+    ESP_LOGI(TAG, "Set rotary default position");
     encoder.setPosition(ROTARYDEFAULT);
 }
 
@@ -63,6 +63,6 @@ void Rotary::handle()
     {
         rotaryLastPos = rotaryCurPos;
         cbSpeedHandler(rotaryLastPos);
-        Serial.println(rotaryCurPos);
+        ESP_LOGI(TAG, "%d", rotaryCurPos);
     } // if
 }
