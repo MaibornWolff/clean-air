@@ -28,6 +28,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Install platformio
         run: |
+          set -x
           pip install platformio
           platformio run -d "${GITHUB_WORKSPACE}/firmware"
           mv "${GITHUB_WORKSPACE}/firmware/.pio/build/esp32/firmware.bin" "${GITHUB_WORKSPACE}/${GITHUB_SHA::8}.bin"
@@ -35,5 +36,5 @@ jobs:
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v2
         with:
-          name: firmware-${GITHUB_SHA::8}.bin
-          path: ${GITHUB_WORKSPACE}/${GITHUB_SHA::8}.bin
+          name: firmware.bin
+          path: ./*.bin
