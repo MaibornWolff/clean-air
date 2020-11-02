@@ -92,7 +92,7 @@ void loadParams(const char *paramFile)
       ESP_LOGI(TAG, "%s loaded", String(paramFile));
     }
     else
-      ESP_LOGI(TAG, "%s failed to load", String(paramFile));
+      ESP_LOGW(TAG, "%s failed to load", String(paramFile));
     param.close();
   } // if
   SPIFFS.end();
@@ -139,7 +139,7 @@ void configureNetwork()
     offlineMode = true;
   }
   */
-  ESP_LOGI(TAG, "%d", WifiCredentials.entries());
+  ESP_LOGD(TAG, "%d", WifiCredentials.entries());
 
   WifiConfig.autoReconnect = true;
   WifiConfig.apid = AP_SSID;
@@ -164,7 +164,7 @@ void configureNetwork()
   // Start the server
   Portal.join({otaSetting, otaSave});
 
-  ESP_LOGI(TAG, "%d", WifiCredentials.entries());
+  ESP_LOGD(TAG, "%d", WifiCredentials.entries());
 
   if (offlineMode == false) // if we already in offline mode skip portal startup
   {
@@ -206,7 +206,7 @@ void setup()
 
   configureNetwork();
 
-  ESP_LOGI(TAG, "Setup complete %s", TAG);
+  ESP_LOGI(TAG, "Setup complete %s");
   ESP_LOGD(TAG, "offlineMode: %d", offlineMode);
   ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
   ESP_LOGD(TAG, "otaUrl: %s", otaUrl);
