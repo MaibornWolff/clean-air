@@ -24,17 +24,21 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.x'
-
+      # Set the short sha
+      - name: get shortsha
+        id: vars
+        run: |
+         echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
       # Runs a single command using the runners shell
       - name: Install platformio
         run: |
           set -x
           pip install platformio
           platformio run -d "${GITHUB_WORKSPACE}/firmware"
-          mv "${GITHUB_WORKSPACE}/firmware/.pio/build/esp32/firmware.bin" "${GITHUB_WORKSPACE}/${GITHUB_SHA::8}.bin"
+          mv "${GITHUB_WORKSPACE}/firmware/.pio/build/esp32/firmware.bin" "${GITHUB_WORKSPACE}/${{ steps.vars.outputs.sha_short }}.bin"
       # Upload artifact
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v2
         with:
-          name: firmware.bin
-          path: ./*.bin
+          name: ${{ steps.vars.outputs.sha_short }}.bin
+          path: ./${{ steps.vars.outputs.sha_short }}.bin
