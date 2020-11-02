@@ -63,6 +63,6 @@ void Rotary::handle()
     {
         rotaryLastPos = rotaryCurPos;
         cbSpeedHandler(rotaryLastPos);
-        ESP_LOGI(TAG, "%d", rotaryCurPos);
+        ESP_LOGV(TAG, "%d", rotaryCurPos);
     } // if
 }

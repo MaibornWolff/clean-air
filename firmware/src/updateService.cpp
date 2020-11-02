@@ -79,15 +79,13 @@ String getLatestVersionFromServer()
             break;
         }
 
-        ESP_LOGI(TAG, "Received empty file from the blobstorage to check for the latest version.");
+        ESP_LOGW(TAG, "Received empty file from the blobstorage to check for the latest version.");
         break;
     case 404:
-        ESP_LOGI(TAG, "Received statuscode 404. File may have been moved or deleted. Cannot check for latest software.");
+        ESP_LOGE(TAG, "Received statuscode 404. File may have been moved or deleted. Cannot check for latest software.");
         break;
     default:
-        ESP_LOGI(TAG, "Could not check for latest software version due to unknown reason.");
-        ESP_LOGI(TAG, "I received the status code %d", statusCode);
-        ESP_LOGI(TAG, "URL: %s%s", base_url, FILENAME_LATEST);
+        ESP_LOGE(TAG, "Could not check for latest software version due to unknown reason.\nI received the status code %d\nURL: %s%s", statusCode, base_url, FILENAME_LATEST);
         break;
     }
 
@@ -122,9 +120,7 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
 
     if (statusCode != 200)
     {
-        ESP_LOGI(TAG, "Could not check for latest software version due to unknown reason.");
-        ESP_LOGI(TAG, "I received the status code %d", statusCode);
-        ESP_LOGI(TAG, "URL: %s%s", base_url, filename);
+        ESP_LOGE(TAG, "Could not check for latest software version due to unknown reason.\n I received the status code %d\nURL: %s%s", statusCode, base_url, filename);
         return;
     }
 
@@ -136,7 +132,7 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     int contentLength = httpClient.getSize();
     if (!Update.begin(contentLength))
     {
-        ESP_LOGI(TAG, "Could not update to latest software because there is not enough space available!");
+        ESP_LOGE(TAG, "Could not update to latest software because there is not enough space available!");
         return;
     }
 
@@ -145,13 +141,13 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     ESP_LOGI(TAG, "OTA: %d/%d bytes written.\n", written, contentLength);
     if (written != contentLength)
     {
-        ESP_LOGI(TAG, "Wrote partial binary. Giving up.");
+        ESP_LOGE(TAG, "Wrote partial binary. Giving up.");
         return;
     }
 
     if (!Update.end())
     {
-        ESP_LOGI(TAG, "Error from Update.end(): %s", String(Update.getError()));
+        ESP_LOGE(TAG, "Error from Update.end(): %s", String(Update.getError()));
         return;
     }
 
@@ -165,7 +161,7 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     }
     else
     {
-        ESP_LOGI(TAG, "Error from Update.isFinished(): %s", String(Update.getError()));
+        ESP_LOGE(TAG, "Error from Update.isFinished(): %s", String(Update.getError()));
         return;
     }
 }
