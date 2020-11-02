@@ -1,6 +1,8 @@
 /**
  * Clean Air Main.
  */
+
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <AutoConnect.h>
 #include <FS.h>
 #include <RotaryEncoder.h>
@@ -14,6 +16,10 @@
 #include "json.h"
 #include "rotary.h"
 #include "updateService.h"
+#include "esp_log.h"
+
+// Logging
+static const char *TAG = "cleanair";
 
 // Variables
 // ota URL
@@ -58,7 +64,7 @@ void rootPage()
 bool startCP(IPAddress ip)
 {
   digitalWrite(LED_BUILTIN, HIGH);
-  Serial.println("CP started, IP: " + WiFi.localIP().toString());
+  ESP_LOGI(TAG, "CP started, IP: %s", WiFi.localIP().toString());
   return true;
 } // startCP
 
@@ -83,10 +89,10 @@ void loadParams(const char *paramFile)
     if (rc)
     {
       getParams();
-      Serial.println(String(paramFile) + " loaded");
+      ESP_LOGI(TAG, "%s loaded", String(paramFile));
     }
     else
-      Serial.println(String(paramFile) + " failed to load");
+      ESP_LOGI(TAG, "%s failed to load", String(paramFile));
     param.close();
   } // if
   SPIFFS.end();
@@ -113,7 +119,7 @@ String onSave(AutoConnectAux &aux, PageArgument &args)
 // Configures network related stuff during setup.
 void configureNetwork()
 {
-  Serial.println("Configure Wifi");
+  ESP_LOGI(TAG, "Configure Wifi");
   // Configure Wifi Settings
   WifiConfig.autoRise = false; // Disable CP portal. This is needed for "offline mode"
   WifiConfig.autoReconnect = true;
@@ -124,16 +130,16 @@ void configureNetwork()
   {
     WifiConfig.immediateStart = true;
     WifiConfig.autoRise = true; // autorise must be true if we want to enter CP mode
-    Serial.println("Rotary button pressed. Will start config AP and CP");
+    ESP_LOGI(TAG, "Rotary button pressed. Will start config AP and CP");
   }
   /*
   else if (WifiCredentials.entries() == 0) // Check configured Wifi Credential entries
   {
-    Serial.println("Found no wifi credentials. Assuming offline mode");
+    ESP_LOGW(TAG, ""Found no wifi credentials. Assuming offline mode");
     offlineMode = true;
   }
   */
-  Serial.println(WifiCredentials.entries() );
+  ESP_LOGI(TAG, "%d", WifiCredentials.entries());
 
   WifiConfig.autoReconnect = true;
   WifiConfig.apid = AP_SSID;
@@ -143,7 +149,7 @@ void configureNetwork()
   Portal.onDetect(startCP);
 
   // Serve default webpage
-  Serial.println("Serving webpage");
+  ESP_LOGI(TAG, "Serving webpage");
   Server.on("/", rootPage);
 
   // Load and set the custom configuration web page for ota updates
@@ -158,25 +164,25 @@ void configureNetwork()
   // Start the server
   Portal.join({otaSetting, otaSave});
 
-  Serial.println(WifiCredentials.entries() );
+  ESP_LOGI(TAG, "%d", WifiCredentials.entries());
 
   if (offlineMode == false) // if we already in offline mode skip portal startup
   {
     if (Portal.begin())
     {
-      Serial.println("Webserver started:" + WiFi.localIP().toString());
+      ESP_LOGI(TAG, "Webserver started: %s", WiFi.localIP().toString());
     }
 
     delay(1000);
 
     if (WiFi.status() != WL_CONNECTED && WifiConfig.autoRise == false)
     {
-      Serial.println("Wifi not connected - offline mode");
+      ESP_LOGW(TAG, "Wifi not connected - offline mode");
       offlineMode = true;
     }
   }
 
-  Serial.println("Setup complete");
+  ESP_LOGI(TAG, "Setup complete");
 }
 
 // TODO: no idea how to stuff the setspeed func directly into the confiure
@@ -188,29 +194,30 @@ void setFanSpeed(int speed)
 // Setup: Called once at bootup
 void setup()
 {
+  esp_log_level_set("*", ESP_LOG_ERROR);
+  esp_log_level_set(TAG, ESP_LOG_VERBOSE);
+
   Serial.begin(BAUD_RATE);
-  Serial.println("Setup initiated");
+
+  ESP_LOGI(TAG, "Setup initiated");
 
   rotary.configure(setFanSpeed);
   fanController.configure();
 
   configureNetwork();
 
-  Serial.println("Setup complete");
-#ifdef DEBUG
-  Serial.print("offlineMode: ");
-  Serial.println(offlineMode ? "true" : "false");
-  Serial.print("otaUrlConfigured: ");
-  Serial.println(otaUrlConfigured ? "true" : "false");
-  Serial.println("otaUrl: " + otaUrl);
-#endif
+  ESP_LOGI(TAG, "Setup complete %s", TAG);
+  ESP_LOGD(TAG, "offlineMode: %d", offlineMode);
+  ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
+  ESP_LOGD(TAG, "otaUrl: %s", otaUrl);
+
 } // setup
 
 // Loop: Main
 void loop()
 {
   // WIFI check, includes connection check and update check
-  if (millis() - previousCheckWifi > CHECK_WIFI_INTERVAL)  
+  if (millis() - previousCheckWifi > CHECK_WIFI_INTERVAL)
   {
     if (WiFi.status() == WL_CONNECTED)
     {
@@ -222,7 +229,7 @@ void loop()
 
   // Handle clients
   Portal.handleClient();
-  
+
   // handlet the current rotary position
   rotary.handle();
 } // loop

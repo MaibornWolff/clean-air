@@ -75,20 +75,19 @@ String getLatestVersionFromServer()
         content = httpClient.getString();
         if (content != "")
         {
-            Serial.println("Successfully requested the latest software version.");
+            ESP_LOGI(TAG, "Successfully requested the latest software version.");
             break;
         }
 
-        Serial.println("Received empty file from the blobstorage to check for the latest version.");
+        ESP_LOGI(TAG, "Received empty file from the blobstorage to check for the latest version.");
         break;
     case 404:
-        Serial.println("Received statuscode 404. File may have been moved or deleted. Cannot check for latest software.");
+        ESP_LOGI(TAG, "Received statuscode 404. File may have been moved or deleted. Cannot check for latest software.");
         break;
     default:
-        Serial.println("Could not check for latest software version due to unknown reason.");
-        Serial.print("I received the status code ");
-        Serial.println(statusCode);
-        Serial.println("URL: " + base_url + FILENAME_LATEST);
+        ESP_LOGI(TAG, "Could not check for latest software version due to unknown reason.");
+        ESP_LOGI(TAG, "I received the status code %d", statusCode);
+        ESP_LOGI(TAG, "URL: %s%s", base_url, FILENAME_LATEST);
         break;
     }
 
@@ -98,7 +97,7 @@ String getLatestVersionFromServer()
 // Stores the current software Version to the eeprom.
 void storeLatestVersion(const String &strToWrite)
 {
-    Serial.println("Storing software with version to nvs: " + strToWrite);
+    ESP_LOGI(TAG, "Storing software with version to nvs: %s", strToWrite);
     nvsData.begin("softwareVersion", false);
     nvsData.putString("softwareVersion", strToWrite);
     nvsData.end();
@@ -116,17 +115,16 @@ String getLatestVersionFromStorage()
 // Downloads and "installs" the update.
 void downloadAndUpdate(String version, String filename, const char *md5Hash)
 {
-    Serial.println("Starting to download new software version, downloading file with name: " + filename);
+    ESP_LOGI(TAG, "Starting to download new software version, downloading file with name: %s", filename);
 
     httpClient.begin(base_url + filename);
     int statusCode = httpClient.GET();
 
     if (statusCode != 200)
     {
-        Serial.println("Could not check for latest software version due to unknown reason.");
-        Serial.print("I received the status code ");
-        Serial.println(statusCode);
-        Serial.println("URL: " + base_url + filename);
+        ESP_LOGI(TAG, "Could not check for latest software version due to unknown reason.");
+        ESP_LOGI(TAG, "I received the status code %d", statusCode);
+        ESP_LOGI(TAG, "URL: %s%s", base_url, filename);
         return;
     }
 
@@ -138,29 +136,28 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     int contentLength = httpClient.getSize();
     if (!Update.begin(contentLength))
     {
-        Serial.println("Could not update to latest software because there is not enough space available!");
+        ESP_LOGI(TAG, "Could not update to latest software because there is not enough space available!");
         return;
     }
 
     WiFiClient *client = httpClient.getStreamPtr();
     size_t written = Update.writeStream(*client);
-    Serial.printf("OTA: %d/%d bytes written.\n", written, contentLength);
+    ESP_LOGI(TAG, "OTA: %d/%d bytes written.\n", written, contentLength);
     if (written != contentLength)
     {
-        Serial.println("Wrote partial binary. Giving up.");
+        ESP_LOGI(TAG, "Wrote partial binary. Giving up.");
         return;
     }
 
     if (!Update.end())
     {
-        Serial.println("Error from Update.end(): " +
-                       String(Update.getError()));
+        ESP_LOGI(TAG, "Error from Update.end(): %s", String(Update.getError()));
         return;
     }
 
     if (Update.isFinished())
     {
-        Serial.println("Update successfully completed. Storing new version to e2prom and rebooting");
+        ESP_LOGI(TAG, "Update successfully completed. Storing new version to e2prom and rebooting");
         storeLatestVersion(version);
 
         // This line is specific to the ESP32 platform:
@@ -168,8 +165,7 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     }
     else
     {
-        Serial.println("Error from Update.isFinished(): " +
-                       String(Update.getError()));
+        ESP_LOGI(TAG, "Error from Update.isFinished(): %s", String(Update.getError()));
         return;
     }
 }
@@ -192,9 +188,9 @@ void checkAndUpdate()
     {
         downloadAndUpdate(polledVersion, polledFilename, expectedMD5Hash);
     }
-    else 
+    else
     {
-        Serial.println("Latest software already installed: " + currentVersion);
+        ESP_LOGI(TAG, "Latest software already installed: %s", currentVersion);
     }
 }
 
@@ -206,7 +202,7 @@ void UpdateService::checkAndUpdateSoftware()
 
     if (upTime != lastCheckedAt)
     {
-        Serial.println("A day has passed. Starting to check for updates. Currently running on software with version: " + currentVersion);
+        ESP_LOGI(TAG, "A day has passed. Starting to check for updates. Currently running on software with version: %s", currentVersion);
 
         lastCheckedAt = upTime;
         checkAndUpdate();
