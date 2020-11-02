@@ -21,22 +21,23 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      # Install python 3.x
       - uses: actions/setup-python@v2
         with:
           python-version: '3.x'
-      # Set the short sha
+      # Set the short sha and save it to a global github variable
       - name: get shortsha
         id: vars
         run: |
          echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
-      # Runs a single command using the runners shell
+      # Install PlatformIO
       - name: Install platformio
         run: |
           set -x
           pip install platformio
           platformio run -d "${GITHUB_WORKSPACE}/firmware"
           mv "${GITHUB_WORKSPACE}/firmware/.pio/build/esp32/firmware.bin" "${GITHUB_WORKSPACE}/${{ steps.vars.outputs.sha_short }}.bin"
-      # Upload artifact
+      # Upload artifact for further processing
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v2
         with:
