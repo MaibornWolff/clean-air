@@ -1,0 +1,7 @@
+3D Prints:
+- 2x lichtschutz
+- 2x universalBoxPlate_uvc_holder
+- 2x uvc_holder
+- 16x universalBoxPlate_adapter
+- 9x universalBoxPlate_clean
+- 1x universalBoxPlate_io
