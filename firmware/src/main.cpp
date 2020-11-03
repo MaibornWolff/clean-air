@@ -121,6 +121,10 @@ void configureNetwork()
 {
   ESP_LOGI(TAG, "Configure Wifi");
   // Configure Wifi Settings
+
+  String hostName = "cleanair-" + String((uint32_t)ESP.getEfuseMac(), HEX);
+
+  WifiConfig.hostName = hostName;
   WifiConfig.autoRise = false; // Disable CP portal. This is needed for "offline mode"
   WifiConfig.autoReconnect = true;
   WifiConfig.apid = AP_SSID;
