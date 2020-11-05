@@ -27,5 +27,12 @@ your extra branch(es).
 And last but not least: Always write your commit messages in the present tense. Your commit message should describe what the commit, when applied, does to the code – not what you did to the code.
 
 
+### Communication and Support Channels
 
-(Derivated from https://github.com/MarcDiethelm/contributing)
+Whether you are a user or contributor, official support channels include:
+- GitHub issues: https://github.com/MaibornWolff/clean-air/issues
+- Slack: https://maibornwolffcleanair.slack.com/
+
+
+
+(Parts derivated from https://github.com/MarcDiethelm/contributing)
