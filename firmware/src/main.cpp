@@ -18,12 +18,6 @@
 #include "updateService.h"
 #include "esp_log.h"
 
-/* You only need to format LITTLEFS the first time you run a
-   test or else use the LITTLEFS plugin to create a partition
-   https://github.com/lorol/arduino-esp32littlefs-plugin */
-
-#define FORMAT_LITTLEFS_IF_FAILED true
-
 // Logging
 static const char *TAG = "cleanair";
 
@@ -124,7 +118,7 @@ void configureNetwork()
   ESP_LOGD(TAG, "Configure Wifi: begin");
   if (!LITTLEFS.begin(FORMAT_LITTLEFS_IF_FAILED))
   {
-    Serial.println("LITTLEFS Mount Failed");
+    ESP_LOGE(TAG, "LITTLEFS Mount Failed");
     return;
   }
 

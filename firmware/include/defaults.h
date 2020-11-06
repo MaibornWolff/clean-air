@@ -9,3 +9,5 @@ const unsigned long BAUD_RATE = 115200;
 
 // Parameter file configuration
 #define PARAM_FILE "/param.json"
+
+#define FORMAT_LITTLEFS_IF_FAILED true
