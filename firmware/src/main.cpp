@@ -6,9 +6,9 @@
 #include <AutoConnect.h>
 #include <FS.h>
 #include <RotaryEncoder.h>
-#include <SPIFFS.h>
 #include <WebServer.h>
 #include <WiFi.h>
+#include <LITTLEFS.h>
 #include "Arduino.h"
 #include "debug.h"
 #include "defaults.h"
@@ -17,6 +17,12 @@
 #include "rotary.h"
 #include "updateService.h"
 #include "esp_log.h"
+
+/* You only need to format LITTLEFS the first time you run a
+   test or else use the LITTLEFS plugin to create a partition
+   https://github.com/lorol/arduino-esp32littlefs-plugin */
+
+#define FORMAT_LITTLEFS_IF_FAILED true
 
 // Logging
 static const char *TAG = "cleanair";
@@ -80,8 +86,7 @@ void getParams()
 // Load parameter from eeprom fs
 void loadParams(const char *paramFile)
 {
-  SPIFFS.begin(true); // formatOnFail == true
-  File param = SPIFFS.open(paramFile, "r");
+  File param = LITTLEFS.open(paramFile, "r");
   if (param)
   {
     // Load the elements with parameters
@@ -95,17 +100,14 @@ void loadParams(const char *paramFile)
       ESP_LOGW(TAG, "%s failed to load", String(paramFile));
     param.close();
   } // if
-  SPIFFS.end();
 } // loadParams
 
 // Save parameter to eeprom
 void saveParams(const char *paramFile)
 {
-  SPIFFS.begin(true);
-  File param = SPIFFS.open(paramFile, "w");
+  File param = LITTLEFS.open(paramFile, "w");
   otaSetting.saveElement(param, {"otaUrl"});
   param.close();
-  SPIFFS.end();
 } // saveParams
 
 // Handler for custom webpage, needed to save data to eeprom
@@ -119,7 +121,13 @@ String onSave(AutoConnectAux &aux, PageArgument &args)
 // Configures network related stuff during setup.
 void configureNetwork()
 {
-  ESP_LOGI(TAG, "Configure Wifi");
+  ESP_LOGD(TAG, "Configure Wifi: begin");
+  if (!LITTLEFS.begin(FORMAT_LITTLEFS_IF_FAILED))
+  {
+    Serial.println("LITTLEFS Mount Failed");
+    return;
+  }
+
   // Configure Wifi Settings
 
   String hostName = "cleanair-" + String((uint32_t)ESP.getEfuseMac(), HEX);
@@ -153,7 +161,7 @@ void configureNetwork()
   Portal.onDetect(startCP);
 
   // Serve default webpage
-  ESP_LOGI(TAG, "Serving webpage");
+  ESP_LOGD(TAG, "Serving webpage");
   Server.on("/", rootPage);
 
   // Load and set the custom configuration web page for ota updates
@@ -185,8 +193,9 @@ void configureNetwork()
       offlineMode = true;
     }
   }
+  LITTLEFS.end();
 
-  ESP_LOGI(TAG, "Setup complete");
+  ESP_LOGD(TAG, "Configure Wifi: complete");
 }
 
 // TODO: no idea how to stuff the setspeed func directly into the confiure
