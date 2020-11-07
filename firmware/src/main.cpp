@@ -5,10 +5,10 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <AutoConnect.h>
 #include <FS.h>
+#include <LITTLEFS.h>
 #include <RotaryEncoder.h>
 #include <WebServer.h>
 #include <WiFi.h>
-#include <LITTLEFS.h>
 #include "Arduino.h"
 #include "debug.h"
 #include "defaults.h"
@@ -17,9 +17,7 @@
 #include "rotary.h"
 #include "updateService.h"
 #include "esp_log.h"
-
-// Logging
-static const char *TAG = "cleanair";
+#include "json_files.h"
 
 // Variables
 // ota URL
@@ -53,6 +51,8 @@ AutoConnectCredential WifiCredentials;
 AutoConnectAux otaSetting;
 AutoConnectAux otaSave;
 
+json_file json_handler;
+
 // Webserver: serve a default page
 void rootPage()
 {
@@ -71,7 +71,7 @@ bool startCP(IPAddress ip)
 // Get parameters from AutoConnectElement
 void getParams()
 {
-  otaUrl = otaSetting.getElement<AutoConnectInput>("otaUrl").value;
+  otaUrl = otaSetting.getElement<AutoConnectInput>(OTA_URL_KEY).value;
   otaUrlConfigured = true;
   otaUrl.trim();
   updateService.setServerUrl(otaUrl);
@@ -80,28 +80,23 @@ void getParams()
 // Load parameter from eeprom fs
 void loadParams(const char *paramFile)
 {
-  File param = LITTLEFS.open(paramFile, "r");
-  if (param)
+  // Load the elements with parameters
+  otaUrl = json_handler.read_string_from_json(paramFile, OTA_URL_KEY);
+  if (otaUrl != "")
   {
-    // Load the elements with parameters
-    bool rc = otaSetting.loadElement(param);
-    if (rc)
-    {
-      getParams();
-      ESP_LOGI(TAG, "%s loaded", String(paramFile));
-    }
-    else
-      ESP_LOGW(TAG, "%s failed to load", String(paramFile));
-    param.close();
-  } // if
+    otaSetting.setElementValue(OTA_URL_KEY, otaUrl);
+    getParams();
+    ESP_LOGI(TAG, "%s loaded", String(paramFile).c_str());
+  }
+  else
+    ESP_LOGW(TAG, "%s failed to load", String(paramFile).c_str());
 } // loadParams
 
 // Save parameter to eeprom
 void saveParams(const char *paramFile)
 {
-  File param = LITTLEFS.open(paramFile, "w");
-  otaSetting.saveElement(param, {"otaUrl"});
-  param.close();
+  otaUrl = otaSetting.getElement<AutoConnectInput>(OTA_URL_KEY).value;
+  json_handler.write_to_json(paramFile, OTA_URL_KEY, otaUrl);
 } // saveParams
 
 // Handler for custom webpage, needed to save data to eeprom
@@ -116,11 +111,6 @@ String onSave(AutoConnectAux &aux, PageArgument &args)
 void configureNetwork()
 {
   ESP_LOGD(TAG, "Configure Wifi: begin");
-  if (!LITTLEFS.begin(FORMAT_LITTLEFS_IF_FAILED))
-  {
-    ESP_LOGE(TAG, "LITTLEFS Mount Failed");
-    return;
-  }
 
   // Configure Wifi Settings
 
@@ -145,7 +135,7 @@ void configureNetwork()
     offlineMode = true;
   }
   */
-  ESP_LOGD(TAG, "%d", WifiCredentials.entries());
+  ESP_LOGD(TAG, "WiFi connections: %d", WifiCredentials.entries());
 
   WifiConfig.autoReconnect = true;
   WifiConfig.apid = AP_SSID;
@@ -176,7 +166,7 @@ void configureNetwork()
   {
     if (Portal.begin())
     {
-      ESP_LOGI(TAG, "Webserver started: %s", WiFi.localIP().toString());
+      ESP_LOGI(TAG, "Webserver started: %s", WiFi.localIP().toString().c_str());
     }
 
     delay(1000);
@@ -201,6 +191,8 @@ void setFanSpeed(int speed)
 // Setup: Called once at bootup
 void setup()
 {
+  json_handler.init();
+
   esp_log_level_set("*", ESP_LOG_ERROR);
   esp_log_level_set(TAG, ESP_LOG_VERBOSE);
 
@@ -213,7 +205,7 @@ void setup()
 
   configureNetwork();
 
-  ESP_LOGI(TAG, "Setup complete %s");
+  ESP_LOGI(TAG, "Setup complete.");
   ESP_LOGD(TAG, "offlineMode: %d", offlineMode);
   ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
   ESP_LOGD(TAG, "otaUrl: %s", otaUrl);
