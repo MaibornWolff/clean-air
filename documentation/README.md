@@ -1,6 +1,6 @@
 ## Documentation
 
-The printing time for the 3D Printable Model is about (TODO:) XXX hours (with 0.4mm nozzle, 0.2mm layer height) cumulated and you'll need about (TODO:) 2kg of PETG or ASA. You should not use PLA since it is not UV resistant. Summa summaro the 3D printable device will cost you about (TODO:) XXX€ incl. the print material and the electrical bill, excluding your time.
+The printing time for the 3D Printable Model is about (TODO:) XXX hours (with 0.4mm nozzle, 0.2mm layer height) cumulated and you'll need about (TODO:) 2kg of PETG or ASA. You should not use PLA since it is not UV resistant. In total, the 3D-printable device will cost you about (TODO:) XXX€ incl. the print material and the electrical bill, excluding your time.
 
 ### Used Hardware
 
