@@ -10,15 +10,17 @@ The large device consists of 6 36W UV-C lamps in a flight case with extra space 
 It seems reliable, that ultraviolet light (especially the UV-C variant) can help kill viruses.
 On the other hand, UVC is dangerous to eyes and skin.
 
+
 At MaibornWolff we put our engineering minds to it and created a solution which works for us.
+
 
 __We build a mobile, safe container with UVC lights inside.__
 
 Here are some reading information sources, if you want to read up on various opinions:
-https://www.medrxiv.org/content/10.1101/2020.05.31.20118588v3
-https://www.bbc.com/future/article/20200327-can-you-kill-coronavirus-with-uv-light
-https://www.cuimc.columbia.edu/news/far-uvc-light-safely-kills-airborne-coronaviruses
-https://pubmed.ncbi.nlm.nih.gov/32547908/
+* https://www.medrxiv.org/content/10.1101/2020.05.31.20118588v3
+* https://www.bbc.com/future/article/20200327-can-you-kill-coronavirus-with-uv-light
+* https://www.cuimc.columbia.edu/news/far-uvc-light-safely-kills-airborne-coronaviruses
+* https://pubmed.ncbi.nlm.nih.gov/32547908/
 
 
 
