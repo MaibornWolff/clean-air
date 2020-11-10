@@ -7,7 +7,7 @@
 #include <Update.h>
 #include "updateService.h"
 #include "defaults.h"
-#include "json_files.h"
+#include "json_handler.h"
 
 // Variables
 // The unit of time during which the last check for an update has taken place. Is dependent on the update interval.
@@ -22,7 +22,7 @@ String currentVersion = "";
 // Some httpClient.
 HTTPClient httpClient;
 
-extern json_file json_handler;
+extern json_handler json_file;
 
 // Extracts the latest software version from given string.
 String extractLatestVersion(String content)
@@ -137,7 +137,7 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     if (Update.isFinished())
     {
         ESP_LOGI(TAG, "Update successfully completed. Storing software version (%s), reboot afterwards.", version);
-        json_handler.write_to_json(PARAM_FILE, VERSION_KEY, version);
+        json_file.write_to_json(PARAM_FILE, VERSION_KEY, version);
         // This line is specific to the ESP32 platform:
         ESP.restart();
     }
@@ -159,7 +159,7 @@ void checkAndUpdate()
     // Set the sw version if the current version is not set.
     if (currentVersion == "")
     {
-        currentVersion = json_handler.read_string_from_json(PARAM_FILE, VERSION_KEY);
+        currentVersion = json_file.read_string_from_json(PARAM_FILE, VERSION_KEY);
     }
     // Starts the actual update if the versions differ.
     if (currentVersion != polledVersion)

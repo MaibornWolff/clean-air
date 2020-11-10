@@ -1,13 +1,13 @@
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <LITTLEFS.h>
-#include "json_files.h"
+#include "json_handler.h"
 
-json_file::json_file()
+json_handler::json_handler()
 {
 }
 
-void json_file::init()
+void json_handler::init()
 {
     // Initialize LittleFS if not present
     if (!LITTLEFS.begin(FORMAT_LITTLEFS_IF_FAILED))
@@ -18,9 +18,8 @@ void json_file::init()
     LITTLEFS.end();
 }
 
-void json_file::write_and_close(String filename)
+void json_handler::write_and_close(String filename)
 {
-
     if (serializeJson(this->json_doc, this->file) == 0)
     {
         ESP_LOGE(TAG, "Failed to write file %s.", filename.c_str());
@@ -30,7 +29,7 @@ void json_file::write_and_close(String filename)
     LITTLEFS.end();
 }
 
-void json_file::open_file(String filename)
+void json_handler::open_file(String filename)
 {
     LITTLEFS.begin();
     this->file = LITTLEFS.open(filename, FILE_WRITE);
@@ -50,21 +49,21 @@ void json_file::open_file(String filename)
     }
 }
 
-void json_file::write_to_json(String filename, String key, String value)
+void json_handler::write_to_json(String filename, String key, String value)
 {
     open_file(filename);
     json_doc[key] = value;
     write_and_close(filename);
 }
 
-void json_file::write_to_json(String filename, String key, int value)
+void json_handler::write_to_json(String filename, String key, int value)
 {
     open_file(filename);
     json_doc[key] = value;
     write_and_close(filename);
 }
 
-String json_file::read_string_from_json(String filename, String key)
+String json_handler::read_string_from_json(String filename, String key)
 {
     String output = "";
 

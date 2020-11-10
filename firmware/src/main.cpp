@@ -17,7 +17,7 @@
 #include "rotary.h"
 #include "updateService.h"
 #include "esp_log.h"
-#include "json_files.h"
+#include "json_handler.h"
 
 // Variables
 // ota URL
@@ -51,7 +51,7 @@ AutoConnectCredential WifiCredentials;
 AutoConnectAux otaSetting;
 AutoConnectAux otaSave;
 
-json_file json_handler;
+json_handler json_file;
 
 // Webserver: serve a default page
 void rootPage()
@@ -81,7 +81,7 @@ void getParams()
 void loadParams(const char *paramFile)
 {
   // Load the elements with parameters
-  otaUrl = json_handler.read_string_from_json(paramFile, OTA_URL_KEY);
+  otaUrl = json_file.read_string_from_json(paramFile, OTA_URL_KEY);
   if (otaUrl != "")
   {
     otaSetting.setElementValue(OTA_URL_KEY, otaUrl);
@@ -96,7 +96,7 @@ void loadParams(const char *paramFile)
 void saveParams(const char *paramFile)
 {
   otaUrl = otaSetting.getElement<AutoConnectInput>(OTA_URL_KEY).value;
-  json_handler.write_to_json(paramFile, OTA_URL_KEY, otaUrl);
+  json_file.write_to_json(paramFile, OTA_URL_KEY, otaUrl);
 } // saveParams
 
 // Handler for custom webpage, needed to save data to eeprom
@@ -191,7 +191,7 @@ void setFanSpeed(int speed)
 // Setup: Called once at bootup
 void setup()
 {
-  json_handler.init();
+  json_file.init();
 
   esp_log_level_set("*", ESP_LOG_ERROR);
   esp_log_level_set(TAG, ESP_LOG_VERBOSE);
