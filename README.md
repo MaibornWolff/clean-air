@@ -14,6 +14,7 @@ More information can be found in the [documentation section](documentation/READM
 ## Warning!
 
 This device uses UV-C lamps which will damage skin and eyes. BE CAREFUL AND DO NOT TURN THE LAMPS ON OUTSIDE THE CASING!
+Furthermore be aware of working with High Voltage for the lamps. CAUTION HIGH VOLTAGE!
 
 ## FAQ
 
