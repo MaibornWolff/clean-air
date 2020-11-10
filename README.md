@@ -6,8 +6,7 @@ This repository contains the building plans to build a DIY-air-cleaner based on 
 The large device consists of 6 36W UV-C lamps in a flight case with extra space for electronics and the ESP32 control unit. The small one contains 2 lamps and can be printed using a 3d printer capable of printing 22cm x 22cm blocks.
 
 
-![Clean Air Device](documentation/images/clean-air-up.png)
-![Clean Air Device](documentation/images/clean-air-open.png)
+![Clean Air Device](documentation/images/clean-air-up.png) ![Clean Air Device](documentation/images/clean-air-open.png)
 
 
 ## Getting started
