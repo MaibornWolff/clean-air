@@ -27,8 +27,20 @@ boolean otaUrlConfigured = false;
 // Set in setup() if we fall to offline mode
 boolean offlineMode = false;
 
+// we started here
+unsigned long bootTime = millis();
 // Wifi check
-unsigned long previousCheckWifi = millis();
+unsigned long previousCheckWifi = bootTime;
+// check for updating operating hours
+unsigned long previousCheckOperatingHours = bootTime;
+
+// operating statistics
+struct statsData
+{
+  int operatingHours;
+};
+
+statsData stats;
 
 // Define custom update service.
 UpdateService updateService;
@@ -51,7 +63,8 @@ AutoConnectCredential WifiCredentials;
 AutoConnectAux otaSetting;
 AutoConnectAux otaSave;
 
-json_handler json_file;
+json_handler param_json;
+json_handler stats_json;
 
 // Webserver: serve a default page
 void rootPage()
@@ -78,32 +91,32 @@ void getParams()
 }
 
 // Load parameter from eeprom fs
-void loadParams(const char *paramFile)
+void loadParams()
 {
   // Load the elements with parameters
-  otaUrl = json_file.read_string_from_json(paramFile, OTA_URL_KEY);
+  param_json.read_file(PARAM_FILE);
+  const char *url = param_json.json_doc[OTA_URL_KEY];
+  otaUrl = url;
   if (otaUrl != "")
   {
     otaSetting.setElementValue(OTA_URL_KEY, otaUrl);
     getParams();
-    ESP_LOGI(TAG, "%s loaded", String(paramFile).c_str());
   }
-  else
-    ESP_LOGW(TAG, "%s failed to load", String(paramFile).c_str());
 } // loadParams
 
 // Save parameter to eeprom
-void saveParams(const char *paramFile)
+void saveParams()
 {
   otaUrl = otaSetting.getElement<AutoConnectInput>(OTA_URL_KEY).value;
-  json_file.write_to_json(paramFile, OTA_URL_KEY, otaUrl);
+  param_json.json_doc[OTA_URL_KEY] = otaUrl;
+  param_json.dump_json(PARAM_FILE);
 } // saveParams
 
 // Handler for custom webpage, needed to save data to eeprom
 String onSave(AutoConnectAux &aux, PageArgument &args)
 {
   getParams();
-  saveParams(PARAM_FILE);
+  saveParams();
   return "Saved";
 }
 
@@ -150,7 +163,7 @@ void configureNetwork()
 
   // Load and set the custom configuration web page for ota updates
   otaSetting.load(otaSettingPage);
-  loadParams(PARAM_FILE);
+  loadParams();
   otaSetting.menu(true);
   otaSave.load(otaSavePage);
   otaSave.on(onSave);  // custom handler when this site is called
@@ -188,11 +201,26 @@ void setFanSpeed(int speed)
   fanController.setSpeed(speed);
 }
 
+void initStats()
+{
+  stats_json.read_file(STATS_FILE);
+
+  int opHours = stats_json.json_doc[OPERATING_HOURS_KEY];
+  if (opHours)
+  {
+    ESP_LOGD(TAG, "Operating hours retrieved from file: %d", opHours);
+    stats.operatingHours = opHours;
+  }
+  else
+  {
+    stats.operatingHours = 0;
+    ESP_LOGD(TAG, "Operating hours apparently not stored yet. Assuming a value of 0.");
+  }
+}
+
 // Setup: Called once at bootup
 void setup()
 {
-  json_file.init();
-
   esp_log_level_set("*", ESP_LOG_ERROR);
   esp_log_level_set(TAG, ESP_LOG_VERBOSE);
 
@@ -205,7 +233,9 @@ void setup()
 
   configureNetwork();
 
-  ESP_LOGI(TAG, "Setup complete.");
+  initStats();
+
+  ESP_LOGI(TAG, "Setup complete %s", TAG);
   ESP_LOGD(TAG, "offlineMode: %d", offlineMode);
   ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
   ESP_LOGD(TAG, "otaUrl: %s", otaUrl);
@@ -224,6 +254,15 @@ void loop()
       updateService.checkAndUpdateSoftware();
     }
     previousCheckWifi = millis();
+  }
+
+  if (millis() - previousCheckOperatingHours > UPDATE_OPERATING_HOURS_INTERVAL)
+  {
+    previousCheckOperatingHours = millis();
+    stats.operatingHours++;
+    ESP_LOGV(TAG, "Uptime: %d ms, total operating time: %d h.", millis() - bootTime, stats.operatingHours);
+    stats_json.json_doc[OPERATING_HOURS_KEY] = stats.operatingHours;
+    stats_json.dump_json(STATS_FILE);
   }
 
   // Handle clients

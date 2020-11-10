@@ -9,17 +9,15 @@
 class json_handler
 {
 private:
-    StaticJsonDocument<DOC_SIZE> json_doc;
     File file;
-    void write_and_close(String filename);
-    void open_file(String filename);
+    void dump_debug_info();
 
 public:
+    StaticJsonDocument<DOC_SIZE> json_doc;
+
     json_handler();
-    void init();
-    void write_to_json(String filename, String key, String value);
-    void write_to_json(String filename, String key, int value);
-    String read_string_from_json(String filename, String key);
+    void read_file(String filename);
+    void dump_json(String filename);
 };
 
 #endif

@@ -22,7 +22,7 @@ String currentVersion = "";
 // Some httpClient.
 HTTPClient httpClient;
 
-extern json_handler json_file;
+extern json_handler param_json;
 
 // Extracts the latest software version from given string.
 String extractLatestVersion(String content)
@@ -137,7 +137,8 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     if (Update.isFinished())
     {
         ESP_LOGI(TAG, "Update successfully completed. Storing software version (%s), reboot afterwards.", version);
-        json_file.write_to_json(PARAM_FILE, VERSION_KEY, version);
+        param_json.json_doc[VERSION_KEY] = version;
+        param_json.dump_json(PARAM_FILE);
         // This line is specific to the ESP32 platform:
         ESP.restart();
     }
@@ -159,7 +160,8 @@ void checkAndUpdate()
     // Set the sw version if the current version is not set.
     if (currentVersion == "")
     {
-        currentVersion = json_file.read_string_from_json(PARAM_FILE, VERSION_KEY);
+        const char version = param_json.json_doc[VERSION_KEY];
+        currentVersion = version;
     }
     // Starts the actual update if the versions differ.
     if (currentVersion != polledVersion)
