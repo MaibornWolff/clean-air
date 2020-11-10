@@ -5,10 +5,10 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <AutoConnect.h>
 #include <FS.h>
+#include <LITTLEFS.h>
 #include <RotaryEncoder.h>
 #include <WebServer.h>
 #include <WiFi.h>
-#include <LITTLEFS.h>
 #include "Arduino.h"
 #include "debug.h"
 #include "defaults.h"
@@ -17,9 +17,7 @@
 #include "rotary.h"
 #include "updateService.h"
 #include "esp_log.h"
-
-// Logging
-static const char *TAG = "cleanair";
+#include "json_handler.h"
 
 // Variables
 // ota URL
@@ -29,8 +27,20 @@ boolean otaUrlConfigured = false;
 // Set in setup() if we fall to offline mode
 boolean offlineMode = false;
 
+// we started here
+unsigned long bootTime = millis();
 // Wifi check
-unsigned long previousCheckWifi = millis();
+unsigned long previousCheckWifi = bootTime;
+// check for updating operating hours
+unsigned long previousCheckOperatingHours = bootTime;
+
+// operating statistics
+struct statsData
+{
+  int operatingHours;
+};
+
+statsData stats;
 
 // Define custom update service.
 UpdateService updateService;
@@ -53,6 +63,9 @@ AutoConnectCredential WifiCredentials;
 AutoConnectAux otaSetting;
 AutoConnectAux otaSave;
 
+json_handler param_json;
+json_handler stats_json;
+
 // Webserver: serve a default page
 void rootPage()
 {
@@ -71,44 +84,39 @@ bool startCP(IPAddress ip)
 // Get parameters from AutoConnectElement
 void getParams()
 {
-  otaUrl = otaSetting.getElement<AutoConnectInput>("otaUrl").value;
+  otaUrl = otaSetting.getElement<AutoConnectInput>(OTA_URL_KEY).value;
   otaUrlConfigured = true;
   otaUrl.trim();
   updateService.setServerUrl(otaUrl);
 }
 
 // Load parameter from eeprom fs
-void loadParams(const char *paramFile)
+void loadParams()
 {
-  File param = LITTLEFS.open(paramFile, "r");
-  if (param)
+  // Load the elements with parameters
+  param_json.read_file(PARAM_FILE);
+  const char *url = param_json.json_doc[OTA_URL_KEY];
+  otaUrl = url;
+  if (otaUrl != "")
   {
-    // Load the elements with parameters
-    bool rc = otaSetting.loadElement(param);
-    if (rc)
-    {
-      getParams();
-      ESP_LOGI(TAG, "%s loaded", String(paramFile));
-    }
-    else
-      ESP_LOGW(TAG, "%s failed to load", String(paramFile));
-    param.close();
-  } // if
+    otaSetting.setElementValue(OTA_URL_KEY, otaUrl);
+    getParams();
+  }
 } // loadParams
 
 // Save parameter to eeprom
-void saveParams(const char *paramFile)
+void saveParams()
 {
-  File param = LITTLEFS.open(paramFile, "w");
-  otaSetting.saveElement(param, {"otaUrl"});
-  param.close();
+  otaUrl = otaSetting.getElement<AutoConnectInput>(OTA_URL_KEY).value;
+  param_json.json_doc[OTA_URL_KEY] = otaUrl;
+  param_json.dump_json(PARAM_FILE);
 } // saveParams
 
 // Handler for custom webpage, needed to save data to eeprom
 String onSave(AutoConnectAux &aux, PageArgument &args)
 {
   getParams();
-  saveParams(PARAM_FILE);
+  saveParams();
   return "Saved";
 }
 
@@ -116,11 +124,6 @@ String onSave(AutoConnectAux &aux, PageArgument &args)
 void configureNetwork()
 {
   ESP_LOGD(TAG, "Configure Wifi: begin");
-  if (!LITTLEFS.begin(FORMAT_LITTLEFS_IF_FAILED))
-  {
-    ESP_LOGE(TAG, "LITTLEFS Mount Failed");
-    return;
-  }
 
   // Configure Wifi Settings
 
@@ -145,7 +148,7 @@ void configureNetwork()
     offlineMode = true;
   }
   */
-  ESP_LOGD(TAG, "%d", WifiCredentials.entries());
+  ESP_LOGD(TAG, "WiFi connections: %d", WifiCredentials.entries());
 
   WifiConfig.autoReconnect = true;
   WifiConfig.apid = AP_SSID;
@@ -160,7 +163,7 @@ void configureNetwork()
 
   // Load and set the custom configuration web page for ota updates
   otaSetting.load(otaSettingPage);
-  loadParams(PARAM_FILE);
+  loadParams();
   otaSetting.menu(true);
   otaSave.load(otaSavePage);
   otaSave.on(onSave);  // custom handler when this site is called
@@ -176,7 +179,7 @@ void configureNetwork()
   {
     if (Portal.begin())
     {
-      ESP_LOGI(TAG, "Webserver started: %s", WiFi.localIP().toString());
+      ESP_LOGI(TAG, "Webserver started: %s", WiFi.localIP().toString().c_str());
     }
 
     delay(1000);
@@ -198,6 +201,23 @@ void setFanSpeed(int speed)
   fanController.setSpeed(speed);
 }
 
+void initStats()
+{
+  stats_json.read_file(STATS_FILE);
+
+  int opHours = stats_json.json_doc[OPERATING_HOURS_KEY];
+  if (opHours)
+  {
+    ESP_LOGD(TAG, "Operating hours retrieved from file: %d", opHours);
+    stats.operatingHours = opHours;
+  }
+  else
+  {
+    stats.operatingHours = 0;
+    ESP_LOGD(TAG, "Operating hours apparently not stored yet. Assuming a value of 0.");
+  }
+}
+
 // Setup: Called once at bootup
 void setup()
 {
@@ -213,7 +233,9 @@ void setup()
 
   configureNetwork();
 
-  ESP_LOGI(TAG, "Setup complete %s");
+  initStats();
+
+  ESP_LOGI(TAG, "Setup complete %s", TAG);
   ESP_LOGD(TAG, "offlineMode: %d", offlineMode);
   ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
   ESP_LOGD(TAG, "otaUrl: %s", otaUrl);
@@ -232,6 +254,15 @@ void loop()
       updateService.checkAndUpdateSoftware();
     }
     previousCheckWifi = millis();
+  }
+
+  if (millis() - previousCheckOperatingHours > UPDATE_OPERATING_HOURS_INTERVAL)
+  {
+    previousCheckOperatingHours = millis();
+    stats.operatingHours++;
+    ESP_LOGV(TAG, "Uptime: %d ms, total operating time: %d h.", millis() - bootTime, stats.operatingHours);
+    stats_json.json_doc[OPERATING_HOURS_KEY] = stats.operatingHours;
+    stats_json.dump_json(STATS_FILE);
   }
 
   // Handle clients
