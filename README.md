@@ -51,4 +51,4 @@ The code and documentation is licensed under the [MIT](LICENSE.md) license. The 
 
 ### How can I help?
 
-Have a look at the [CONTRIBUTING](CONTRIBUTING.md) documentation.
+Have a look at the [CONTRIBUTING](CONTRIBUTING.md) documentation. You can also join our [Slack Channel](https://maibornwolffcleanair.slack.com/) to get in touch with us.
