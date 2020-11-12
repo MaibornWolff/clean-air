@@ -3,11 +3,11 @@
   <a href="url"><img src="/hardware/all_wood/pictures/animation.gif" width="80%"></a>
 </p>
 This hardware version is mainly build out of wood, which can be cut to length by most hardware stores or in a home workshop. For the light shutters, a combination of angle-profiles and wooden mounts is used.
-Those mounts can either be cut with a CNC, 3d printed or carved with hand tools. A technical drawing is included in this repository.
+Those mounts can either be cut with a CNC, 3d printed or carved with hand tools. A technical drawing is included in this repository. Due to the different methods to produce this parts, those shutters need to either be glued, screwed or held otherwise in to place after installing them like shown in the animation above. 
 
-### BOM
+### Materials
 
-Wooden parts:
+#### Wooden parts:
 
 |   | length  | width     | thickness |                          |
 |---|---------|-----------|-----------|--------------------------|
@@ -18,9 +18,8 @@ Wooden parts:
 | 4 | 350mm   | 40mm      | 9mm       | mounting for light tubes |
 | 4 | 350mm   | 50mm      | 9mm       | light filter mount       |
 
-34 345mm long 30*30mm angle profiles from an UV-C resistant material like PVC are needed for the light shutters. 
 
-Electronics:
+#### Electronics:
 
 |  | Description | Model suggestion |
 |-|-|-|
@@ -34,4 +33,10 @@ Electronics:
 | 1 | temperature sensor | ds18b20 |
 | 1 | ESP32 | Wemos D1 ESP32 |
 | 1 | 12V/5V DC/DC |  |
+
+#### Other
+- 34 pieces of 345mm long 30*30mm angle profiles from an UV-C resistant material like PVC are needed for the light shutters. 
+- Aluminum foil or an other reflective surface to make the UV-C chamber reflective from the inside.
+- Screws
+
 
