@@ -1,5 +1,5 @@
 # DIY Version with accessible items from your local hardware store
-
+<a href="url"><img src="/hardware/all_wood/pictures/frontview_open_side.png" width="100%"></a>
 This hardware version is mainly build out of wood, which can be cut to length by most hardware stores or in a home workshop. For the light shutters, a combination of angle-profiles and wooden mounts is used.
 Those mounts can either be cut with a CNC, 3d printed or carved with hand tools. A technical drawing is included in this repository.
 
