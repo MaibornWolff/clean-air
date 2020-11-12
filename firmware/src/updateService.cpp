@@ -2,10 +2,12 @@
  * Clean Air Update Service.
  */
 #include <EEPROM.h>
+#include <FS.h>
 #include <HTTPClient.h>
 #include <Update.h>
-#include <Preferences.h>
 #include "updateService.h"
+#include "defaults.h"
+#include "json_handler.h"
 
 // Variables
 // The unit of time during which the last check for an update has taken place. Is dependent on the update interval.
@@ -20,8 +22,7 @@ String currentVersion = "";
 // Some httpClient.
 HTTPClient httpClient;
 
-// NVS parameter storage
-Preferences nvsData;
+extern json_handler param_json;
 
 // Extracts the latest software version from given string.
 String extractLatestVersion(String content)
@@ -92,24 +93,6 @@ String getLatestVersionFromServer()
     return content;
 }
 
-// Stores the current software Version to the eeprom.
-void storeLatestVersion(const String &strToWrite)
-{
-    ESP_LOGI(TAG, "Storing software with version to nvs: %s", strToWrite);
-    nvsData.begin("softwareVersion", false);
-    nvsData.putString("softwareVersion", strToWrite);
-    nvsData.end();
-}
-
-// Reads the store value from the eeprom
-String getLatestVersionFromStorage()
-{
-    nvsData.begin("softwareVersion", true);
-    String nvsVersion = nvsData.getString("softwareVersion", "undef");
-    nvsData.end();
-    return nvsVersion;
-}
-
 // Downloads and "installs" the update.
 void downloadAndUpdate(String version, String filename, const char *md5Hash)
 {
@@ -153,9 +136,9 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
 
     if (Update.isFinished())
     {
-        ESP_LOGI(TAG, "Update successfully completed. Storing new version to e2prom and rebooting");
-        storeLatestVersion(version);
-
+        ESP_LOGI(TAG, "Update successfully completed. Storing software version (%s), reboot afterwards.", version);
+        param_json.json_doc[VERSION_KEY] = version;
+        param_json.dump_json(PARAM_FILE);
         // This line is specific to the ESP32 platform:
         ESP.restart();
     }
@@ -177,7 +160,8 @@ void checkAndUpdate()
     // Set the sw version if the current version is not set.
     if (currentVersion == "")
     {
-        currentVersion = getLatestVersionFromStorage();
+        const char version = param_json.json_doc[VERSION_KEY];
+        currentVersion = version;
     }
     // Starts the actual update if the versions differ.
     if (currentVersion != polledVersion)
