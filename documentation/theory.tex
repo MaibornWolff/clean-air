@@ -1,11 +1,13 @@
 % !TEX encoding = UTF-8 Unicode
-\documentclass[12pt]{article}
+\documentclass[12pt]{scrartcl}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{url}
 \usepackage[utf8]{inputenc}
+\usepackage{units}
 
-\author{Michael Kiefer}
+\author{Michael Kiefer}\publishers{MaibornWolff GmbH, Versmannstr. 2, 20457 Hamburg}
 \title{Calculations for the Clean-Air UVC device}
 
 \begin{document}
@@ -74,31 +76,13 @@ In order to disable the virus particles, we need to expose them to a certain lev
 \end{figure}
 
 Numbers on the irradiation dose vary. 
-In order to deactivate coronavirus particles, \cite {ozog}  says that an irradiation of 10 J/m$^2$ is sufficient. However, \cite{bianco} says that an irradiation of 37 J/m$^2$ is needed. In \cite{hessling} this value is given as the probable value for the log-reduction dose which would mean that such an irradiation would at least deactivate 90\% of the virus particles. For the ongoing calculation, we aim at an irradiation with 120 J/m$^2$ which would mean a log-3 reduction in case of the number given by \cite{hessling}.
+In order to deactivate coronavirus particles, \cite {ozog}  says that an irradiation of $\unit[10]{J/m^2}$ is sufficient. However, \cite{bianco} says that an irradiation of $\unit[37]{J/m^2}$ is needed. In \cite{hessling} this value is given as the probable value for the log-reduction dose which would mean that such an irradiation would at least deactivate 90\% of the virus particles. For the ongoing calculation, we aim at an irradiation with $\unit[120]{J/m^2}$ which would mean a log-3 reduction in case of the number given by \cite{hessling}.
 
-In our set-up, the lamps each consume 36W in electrical power and emit 12W of UVC light.
+In our set-up, the lamps each consume $\unit[36]{W}$ in electrical power and emit $\unit[12]{W}$ of UVC light.
 
 The two sets of distances given in figure \ref{fig:distances} describe the positions that are furthest away from the lamps and thus the places where the irradiation is the weakest.
 
-Using the excel sheet attached in the source repository, we calculate that the maximum throughput the device can tend to is in the range of 1000 m$^3$/h.
-
-
-\section{Single lamp, cylindrical appliance}\label{sect:multitube}
-
-For a single-lamp cylindrical setup (now with the base surface as $2\pi r$), equation \eqref{eqn:irradiance_final}
-turns into
-\begin{equation} 
-I  = \frac{P r}{2 \Phi} \label{eqn:irradiance_single}
-\end{equation}
-
-The length of the tube has no direct influence on the irradiance! Instead, only the relation between air flow and tube power is important. The fact that the irradiance grows with the radius is only counter-intuitive at first sight.  
-
-Checking the units in \eqref{eqn:irradiance_single}
-
-\begin{align}
-  [I]  &= \frac{J/s * m }{ m^3 / s }\\
-    &= \frac{J}{m^2}
-\end{align}
+Using the excel sheet attached in the source repository, we calculate that the maximum throughput the device can tend to is in the range of $\unit[1000]{m^3/h}$. The WHO recommends an exchange rate of 6 air changes per hour \cite{who}. Assuming a height of $\unit[2.5]{m}$, this means that one device is appropriate for a room of up to $\unit[66]{m^2}$.
 
 
 \begin{thebibliography}{9}
@@ -119,7 +103,13 @@ Checking the units in \eqref{eqn:irradiance_single}
 \bibitem{ozog}
   David M. Ozog, et al.,
   The Effect of Ultraviolet C Radiation Against SARS-CoV-2 Inoculated N95 Respirators
-  medRxiv 2020.05.31.20118588; doi: https://doi.org/10.1101/2020.05.31.20118588 
+  medRxiv 2020.05.31.20118588; doi: \url{https://doi.org/10.1101/2020.05.31.20118588}
+
+\bibitem{who}
+  Coronavirus disease (COVID-19): Ventilation and air conditioning in health facilities
+  29 July 2020  Q\&A
+  \url{https://www.who.int/news-room/q-a-detail/coronavirus-disease-covid-19-ventilation-and-air-conditioning-in-health-facilities}
+
 \end{thebibliography}
 
 \end{document}
