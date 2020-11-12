@@ -1,4 +1,4 @@
-# DIY Version with accessible items from your local hardware store
+# DIY Version with items from your local hardware store
 <p align="center">
   <a href="url"><img src="/hardware/all_wood/pictures/animation.gif" width="80%"></a>
 </p>
