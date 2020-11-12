@@ -32,6 +32,7 @@ Those mounts can either be cut with a CNC, 3d printed or carved with hand tools.
 | 1 | 50mm PWM fan |  |
 | 1 | temperature sensor | ds18b20 |
 | 1 | ESP32 | Wemos D1 ESP32 |
+| 1 | rotary encoder | KY-040 |
 | 1 | 12V/5V DC/DC |  |
 
 #### Other
