@@ -28,7 +28,7 @@ void FanController::configure(/*void (*speedHandler)(int, int, int, int)*/)
     ledcSetup(0, FAN_FREQ, FAN_RES);
 
     //Set fan speed to 100% to ensure good ventilation during a possible calibration process
-    fanSpeedToRunAt = 100;
+    fanSpeedToRunAt = 255;
 }
 
 // TODO: this needs to run on a different thread to be able to constantly monitor the fans speed
@@ -40,6 +40,6 @@ void FanController::emitFanSpeed()
 // Set fan speed in percent - 0 is off, 1-100 is minimum to maximum speed
 void FanController::setSpeed(int speed)
 {
-    ledcWrite(0, (speed == 0) ? 0 : map(speed, 1, 100, 85, 255));
+    ledcWrite(0, speed);
     fanSpeedToRunAt = speed;
 }

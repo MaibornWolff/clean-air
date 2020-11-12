@@ -1,9 +1,9 @@
 // Configurations for the KY-040 rotary element
 
 // Rotary configuration
-#define ROTARYSTEPS 2
+#define ROTARYSTEPS 8
 #define ROTARYMIN 0
-#define ROTARYMAX 16
+#define ROTARYMAX 255
 // ROTARYDEFAULT is multiplied with the ROTARYSTEPS
 #define ROTARYDEFAULT 4
 
