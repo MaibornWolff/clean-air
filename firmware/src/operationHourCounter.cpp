@@ -4,12 +4,12 @@
 
 // Variables
 // The unit of time during which the last check for an update has taken place. Is dependent on the update interval.
-int lastHourCheckedAt = -1;
+int lastHourUpdatedAt = -1;
 
 u_long operatingHours = 0;
 
 // Define the jsonHandler.
-JsonHandler jsonHandler;
+extern JsonHandler jsonHandler;
 
 // Constructor.
 OperationHourCounter::OperationHourCounter(JsonHandler handler)
@@ -45,7 +45,7 @@ void OperationHourCounter::countOperationHours()
 {
     int upTimeInHours = round(millis() / UPDATE_OPERATING_HOURS_INTERVAL);
 
-    if (upTimeInHours != lastHourCheckedAt)
+    if (upTimeInHours != lastHourUpdatedAt)
     {
         updateHours();
     }

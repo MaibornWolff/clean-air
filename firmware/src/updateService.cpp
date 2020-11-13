@@ -22,7 +22,7 @@ String currentVersion = "";
 HTTPClient httpClient;
 
 // The Jsonfile containing the saved version
-JsonHandler jsonHandler;
+extern JsonHandler jsonHandler;
 
 // Constructor.
 UpdateService::UpdateService(JsonHandler handler)

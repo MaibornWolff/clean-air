@@ -24,11 +24,11 @@ public:
 
     JsonHandler();
 
-    virtual void loadStatistics();
-    virtual void loadParameter();
+    void loadStatistics();
+    void loadParameter();
 
-    virtual void storeStatistics();
-    virtual void storeParameter();
+    void storeStatistics();
+    void storeParameter();
 };
 
 #endif

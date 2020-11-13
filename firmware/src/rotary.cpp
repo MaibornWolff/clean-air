@@ -14,7 +14,7 @@ RotaryEncoder encoder(KY_DT, KY_CLK);
 int rotaryLastPos = -1;
 
 // Define the JsonHandler.
-JsonHandler jsonHandler;
+extern JsonHandler jsonHandler;
 
 // The callback function to handle changes emitted by the rotary
 CallbackSpeedHandler cbSpeedHandler;
