@@ -24,7 +24,7 @@ private:
 
 public:
     // Constructor.
-    Rotary(JsonHandler, void (*)(int));
+    void setup(JsonHandler, void (*)(int));
 
     // Reacts on changes of knobs rotation.
     void handle();

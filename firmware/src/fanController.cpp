@@ -21,7 +21,7 @@ int fan_4_speed = -1;
 void (*localSpeedHandler)(int, int, int, int);
 
 // Configure fan related stuff during setup.
-FanController::FanController(/*void (*speedHandler)(int, int, int, int)*/)
+void FanController::setup(/*void (*speedHandler)(int, int, int, int)*/)
 {
     //localSpeedHandler = speedHandler;
     ledcAttachPin(FAN_PWM, 0);

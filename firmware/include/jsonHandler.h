@@ -22,7 +22,7 @@ public:
     StaticJsonDocument<DOC_SIZE> statistics;
     StaticJsonDocument<DOC_SIZE> parameter;
 
-    JsonHandler();
+    void setup();
 
     void loadStatistics();
     void loadParameter();

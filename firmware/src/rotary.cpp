@@ -20,7 +20,7 @@ extern JsonHandler jsonHandler;
 CallbackSpeedHandler cbSpeedHandler;
 
 // Constructor.
-Rotary::Rotary(JsonHandler handler, CallbackSpeedHandler speedHandler)
+void Rotary::setup(JsonHandler handler, CallbackSpeedHandler speedHandler)
 {
     jsonHandler = handler;
     rotaryLastPos = jsonHandler.statistics[FAN_SPEED_KEY];
@@ -70,6 +70,12 @@ int Rotary::calculateRotaryPosition()
     return newPos;
 } // calculateRotaryPosition
 
+void updateRotaryPosition(int position)
+{
+    jsonHandler.statistics[FAN_SPEED_KEY] = position;
+    jsonHandler.storeStatistics();
+}
+
 // Reacts on changes of knobs rotation.
 void Rotary::handle()
 {
@@ -79,6 +85,8 @@ void Rotary::handle()
     {
         rotaryLastPos = rotaryCurPos;
         cbSpeedHandler(rotaryLastPos);
+        updateRotaryPosition(rotaryLastPos);
+
         ESP_LOGV(TAG, "%d", rotaryCurPos);
     } // if
 }

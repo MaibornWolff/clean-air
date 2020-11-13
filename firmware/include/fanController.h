@@ -14,7 +14,7 @@ class FanController
 {
 public:
     // configures the knob to be able to interact with.
-    FanController(/*void (*speedHandler)(int, int, int, int)*/);
+    void setup(/*void (*speedHandler)(int, int, int, int)*/);
 
     // Sets the fans speed according to the number handed in.
     void setSpeed(int);

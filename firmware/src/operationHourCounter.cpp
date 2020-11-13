@@ -12,7 +12,7 @@ u_long operatingHours = 0;
 extern JsonHandler jsonHandler;
 
 // Constructor.
-OperationHourCounter::OperationHourCounter(JsonHandler handler)
+void OperationHourCounter::setup(JsonHandler handler)
 {
     jsonHandler = handler;
     this->loadHours();
@@ -43,10 +43,11 @@ void OperationHourCounter::updateHours()
 
 void OperationHourCounter::countOperationHours()
 {
-    int upTimeInHours = round(millis() / UPDATE_OPERATING_HOURS_INTERVAL);
+    u_long upTimeInHours = round(millis() / UPDATE_OPERATING_HOURS_INTERVAL);
 
     if (upTimeInHours != lastHourUpdatedAt)
     {
         updateHours();
+        lastHourUpdatedAt = upTimeInHours;
     }
 }

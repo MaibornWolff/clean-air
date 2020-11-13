@@ -35,16 +35,16 @@ boolean offlineMode = false;
 JsonHandler jsonHandler;
 
 // Define the statisticsHandler.
-OperationHourCounter operationHourCounter = OperationHourCounter(jsonHandler);
+OperationHourCounter operationHourCounter;
 
 // Define the fans controller.
 FanController fanController;
 
 // Define the adpter to handle hardware related io things.
-Rotary rotary = Rotary(jsonHandler, setFanSpeed);
+Rotary rotary;
 
 // Define custom update service.
-UpdateService updateService = UpdateService(jsonHandler);
+UpdateService updateService;
 
 // Define webserver variable and tell autoconnect to use it
 WebServer Server;
@@ -190,13 +190,21 @@ void setup()
 
   ESP_LOGI(TAG, "Setup initiated");
 
+  // Define the jsonHandler.
+  jsonHandler.setup();
+  operationHourCounter.setup(jsonHandler);
+  fanController.setup();
+  rotary.setup(jsonHandler, setFanSpeed);
+  updateService.setup(jsonHandler);
+
   configureNetwork();
 
   ESP_LOGI(TAG, "Setup complete %s", TAG);
   ESP_LOGD(TAG, "offlineMode: %d", offlineMode);
   ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
-  ESP_LOGD(TAG, "otaUrl: %s", otaUrl);
-
+  ESP_LOGD(TAG, "fanspeed: %s", jsonHandler.statistics[FAN_SPEED_KEY]);
+  ESP_LOGD(TAG, "operating hours: %s", jsonHandler.statistics[OPERATING_HOURS_KEY]);
+  ESP_LOGD(TAG, "version: %s", jsonHandler.parameter[VERSION_KEY]);
 } // setup
 
 // Loop: Main

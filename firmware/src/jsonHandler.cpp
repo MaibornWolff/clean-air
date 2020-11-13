@@ -3,7 +3,7 @@
 #include <LITTLEFS.h>
 #include "jsonHandler.h"
 
-JsonHandler::JsonHandler()
+void JsonHandler::setup()
 {
     loadParameter();
     loadStatistics();

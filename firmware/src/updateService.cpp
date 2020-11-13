@@ -10,7 +10,7 @@
 
 // Variables
 // The unit of time during which the last check for an update has taken place. Is dependent on the update interval.
-int lastHourCheckedAt = -1;
+long lastHourCheckedAt = -1;
 
 // The storage accounts baseurl. Currently just something to test with and to have a backup url.
 String base_url = FALLBACK_BASE_URL;
@@ -24,8 +24,7 @@ HTTPClient httpClient;
 // The Jsonfile containing the saved version
 extern JsonHandler jsonHandler;
 
-// Constructor.
-UpdateService::UpdateService(JsonHandler handler)
+void UpdateService::setup(JsonHandler handler)
 {
     jsonHandler = handler;
 }
@@ -190,7 +189,7 @@ void checkAndUpdate()
 void UpdateService::checkAndUpdateSoftware()
 {
     // The # units since the device has started.
-    int upTime = round(millis() / UPDATE_INTERVAL_IN_MS);
+    u_long upTime = round(millis() / UPDATE_INTERVAL_IN_MS);
 
     if (upTime != lastHourCheckedAt)
     {

@@ -12,7 +12,7 @@ class UpdateService
 {
 public:
     // Constructor.
-    UpdateService(JsonHandler);
+    void setup(JsonHandler);
 
     // Checks if the given interval has passed and then starts to check for new software.
     void checkAndUpdateSoftware();
