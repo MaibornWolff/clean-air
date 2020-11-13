@@ -4,7 +4,7 @@
 
 // Variables
 // The unit of time during which the last check for an update has taken place. Is dependent on the update interval.
-int lastHourUpdatedAt = -1;
+u_long lastHourUpdatedAt = 0;
 
 u_long operatingHours = 0;
 
@@ -20,7 +20,7 @@ void OperationHourCounter::setup(JsonHandler handler)
 
 void OperationHourCounter::loadHours()
 {
-    int opHours = jsonHandler.statistics[OPERATING_HOURS_KEY];
+    u_long opHours = jsonHandler.statistics[OPERATING_HOURS_KEY].as<u_long>();
     if (opHours)
     {
         operatingHours = opHours;

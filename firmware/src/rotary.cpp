@@ -11,7 +11,7 @@
 RotaryEncoder encoder(KY_DT, KY_CLK);
 
 // Last known rotary position.
-int rotaryLastPos = -1;
+int rotaryLastPos;
 
 // Define the JsonHandler.
 extern JsonHandler jsonHandler;
@@ -22,26 +22,21 @@ CallbackSpeedHandler cbSpeedHandler;
 // Constructor.
 void Rotary::setup(JsonHandler handler, CallbackSpeedHandler speedHandler)
 {
+    ESP_LOGI(TAG, "Starting to configure rotary.");
+
+    rotaryLastPos = jsonHandler.statistics[FAN_SPEED_KEY].as<int>();
+    pinMode(LED_BUILTIN, OUTPUT);
+
     jsonHandler = handler;
-    rotaryLastPos = jsonHandler.statistics[FAN_SPEED_KEY];
-    if (!rotaryLastPos)
+    cbSpeedHandler = speedHandler;
+
+    if (rotaryLastPos <= 0)
     {
         rotaryLastPos = ROTARYMAX;
     }
 
-    cbSpeedHandler = speedHandler;
-}
-
-// Configure the rotary.
-void Rotary::configure()
-{
-    ESP_LOGI(TAG, "Starting to configure rotary.");
-
-    pinMode(LED_BUILTIN, OUTPUT);
-
-    // Set Rotary default position
-    ESP_LOGI(TAG, "Set rotary default position");
-    encoder.setPosition(rotaryLastPos);
+    encoder.tick();
+    encoder.setPosition((ROTARYMAX - rotaryLastPos) / ROTARYSTEPS);
     cbSpeedHandler(rotaryLastPos);
 }
 
@@ -80,11 +75,12 @@ void updateRotaryPosition(int position)
 void Rotary::handle()
 {
     // Handle rotary element
-    int rotaryCurPos = this->calculateRotaryPosition();
+    int rotaryCurPos = calculateRotaryPosition();
     if (rotaryLastPos != rotaryCurPos)
     {
         rotaryLastPos = rotaryCurPos;
         cbSpeedHandler(rotaryLastPos);
+
         updateRotaryPosition(rotaryLastPos);
 
         ESP_LOGV(TAG, "%d", rotaryCurPos);

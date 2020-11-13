@@ -3,7 +3,7 @@
 #include "rotary.h"
 
 // The fans target speed.
-int fanSpeedToRunAt = ROTARYMAX;
+int fanSpeedToRunAt;
 
 // The speed of fan 1.
 int fan_1_speed = -1;

@@ -9,7 +9,7 @@ void JsonHandler::setup()
     loadStatistics();
 }
 
-void dump_debug_info(StaticJsonDocument<DOC_SIZE> jsonDoc)
+void dump_debug_info(StaticJsonDocument<DOC_SIZE> &jsonDoc)
 {
     ESP_LOGD(TAG, "Document size: %d", jsonDoc.size());
 
@@ -19,7 +19,7 @@ void dump_debug_info(StaticJsonDocument<DOC_SIZE> jsonDoc)
     ESP_LOGD(TAG, "Document string: %s", outstring.c_str());
 }
 
-void writeFile(String filename, StaticJsonDocument<DOC_SIZE> jsonDoc)
+void writeFile(String filename, StaticJsonDocument<DOC_SIZE> &jsonDoc)
 {
     LITTLEFS.begin();
 
@@ -36,7 +36,7 @@ void writeFile(String filename, StaticJsonDocument<DOC_SIZE> jsonDoc)
     LITTLEFS.end();
 }
 
-void readFile(String filename, StaticJsonDocument<DOC_SIZE> jsonDoc)
+void readFile(String filename, StaticJsonDocument<DOC_SIZE> &jsonDoc)
 {
     if (!LITTLEFS.begin(FORMAT_LITTLEFS_IF_FAILED))
     {
@@ -72,20 +72,20 @@ void readFile(String filename, StaticJsonDocument<DOC_SIZE> jsonDoc)
 
 void JsonHandler::loadStatistics()
 {
-    readFile(STATS_FILE, this->statistics);
+    readFile(STATS_FILE, statistics);
 }
 
 void JsonHandler::loadParameter()
 {
-    readFile(PARAM_FILE, this->parameter);
+    readFile(PARAM_FILE, parameter);
 }
 
 void JsonHandler::storeStatistics()
 {
-    writeFile(STATS_FILE, this->statistics);
+    writeFile(STATS_FILE, statistics);
 }
 
 void JsonHandler::storeParameter()
 {
-    writeFile(PARAM_FILE, this->parameter);
+    writeFile(PARAM_FILE, parameter);
 }

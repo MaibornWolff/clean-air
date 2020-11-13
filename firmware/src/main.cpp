@@ -169,7 +169,6 @@ void configureNetwork()
       offlineMode = true;
     }
   }
-  // LITTLEFS.end();
 
   ESP_LOGD(TAG, "Configure Wifi: complete");
 }
@@ -202,9 +201,10 @@ void setup()
   ESP_LOGI(TAG, "Setup complete %s", TAG);
   ESP_LOGD(TAG, "offlineMode: %d", offlineMode);
   ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
-  ESP_LOGD(TAG, "fanspeed: %d", jsonHandler.statistics[FAN_SPEED_KEY]);
-  ESP_LOGD(TAG, "operating hours: %lu", jsonHandler.statistics[OPERATING_HOURS_KEY]);
-  ESP_LOGD(TAG, "version: %s", jsonHandler.parameter[VERSION_KEY]);
+  ESP_LOGD(TAG, "fanspeed: %d", jsonHandler.statistics[FAN_SPEED_KEY].as<int>());
+  ESP_LOGD(TAG, "operating hours: %lu", jsonHandler.statistics[OPERATING_HOURS_KEY].as<u_long>());
+  String s = (jsonHandler.parameter[VERSION_KEY]);
+  ESP_LOGD(TAG, "version: %s", s.c_str());
 } // setup
 
 // Loop: Main

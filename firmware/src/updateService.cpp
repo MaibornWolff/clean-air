@@ -10,7 +10,7 @@
 
 // Variables
 // The unit of time during which the last check for an update has taken place. Is dependent on the update interval.
-long lastHourCheckedAt = -1;
+u_long lastHourCheckedAt = 0;
 
 // The storage accounts baseurl. Currently just something to test with and to have a backup url.
 String base_url = FALLBACK_BASE_URL;
@@ -168,8 +168,9 @@ void checkAndUpdate()
     // Set the sw version if the current version is not set.
     if (currentVersion == "")
     {
-        const char version = jsonHandler.statistics[VERSION_KEY];
-        ESP_LOGI(TAG, "Softwareversion from storage %c", version);
+        String _version = jsonHandler.parameter[VERSION_KEY];
+        String version = _version.c_str();
+        ESP_LOGI(TAG, "Softwareversion from storage %s", version);
         currentVersion = version;
     }
     // Starts the actual update if the versions differ.

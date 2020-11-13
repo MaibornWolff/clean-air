@@ -4,17 +4,17 @@
 #include <ArduinoJson.h>
 
 #define FORMAT_LITTLEFS_IF_FAILED true
-#define DOC_SIZE 1024
+#define DOC_SIZE 512
 
 // Parameter file configuration
-#define PARAM_FILE "/param.json"
-#define OTA_URL_KEY "otaUrl"
-#define VERSION_KEY "softwareVersion"
+static String PARAM_FILE{"/param.json"};
+static String OTA_URL_KEY{"otaUrl"};
+static String VERSION_KEY{"softwareVersion"};
 
 // Statistics file configuration
-#define STATS_FILE "/stats.json"
-#define OPERATING_HOURS_KEY "operatingHours"
-#define FAN_SPEED_KEY "fanSpeed"
+static String STATS_FILE{"/stats.json"};
+static String OPERATING_HOURS_KEY{"operatingHours"};
+static String FAN_SPEED_KEY{"fanSpeed"};
 
 class JsonHandler
 {

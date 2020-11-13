@@ -19,7 +19,6 @@ typedef void (*CallbackSpeedHandler)(int);
 class Rotary
 {
 private:
-    void configure();
     int calculateRotaryPosition();
 
 public:
