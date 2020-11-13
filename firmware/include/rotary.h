@@ -1,3 +1,5 @@
+#include "jsonHandler.h"
+
 // Configurations for the KY-040 rotary element
 
 // Rotary configuration
@@ -16,9 +18,13 @@ typedef void (*CallbackSpeedHandler)(int);
 
 class Rotary
 {
+private:
+    void configure();
+    int calculateRotaryPosition();
+
 public:
-    // configures the knob to be able to interact with.
-    void configure(void (*)(int));
+    // Constructor.
+    Rotary(JsonHandler, void (*)(int));
 
     // Reacts on changes of knobs rotation.
     void handle();

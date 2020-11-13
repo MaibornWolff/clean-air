@@ -2,6 +2,7 @@
  * Clean Air Rotary. Handles the logic related to the rotary.
  */
 #include "defaults.h"
+#include "jsonHandler.h"
 #include "rotary.h"
 #include <RotaryEncoder.h>
 
@@ -12,25 +13,40 @@ RotaryEncoder encoder(KY_DT, KY_CLK);
 // Last known rotary position.
 int rotaryLastPos = -1;
 
+// Define the JsonHandler.
+JsonHandler jsonHandler;
+
 // The callback function to handle changes emitted by the rotary
 CallbackSpeedHandler cbSpeedHandler;
 
-// Configure the rotary.
-void Rotary::configure(CallbackSpeedHandler speedHandler)
+// Constructor.
+Rotary::Rotary(JsonHandler handler, CallbackSpeedHandler speedHandler)
 {
-    ESP_LOGI(TAG, "Starting to configure rotary.");
+    jsonHandler = handler;
+    rotaryLastPos = jsonHandler.statistics[FAN_SPEED_KEY];
+    if (!rotaryLastPos)
+    {
+        rotaryLastPos = ROTARYMAX;
+    }
 
     cbSpeedHandler = speedHandler;
+}
+
+// Configure the rotary.
+void Rotary::configure()
+{
+    ESP_LOGI(TAG, "Starting to configure rotary.");
 
     pinMode(LED_BUILTIN, OUTPUT);
 
     // Set Rotary default position
     ESP_LOGI(TAG, "Set rotary default position");
-    encoder.setPosition(ROTARYDEFAULT);
+    encoder.setPosition(rotaryLastPos);
+    cbSpeedHandler(rotaryLastPos);
 }
 
 // Handle the rotary element: Check the position and return the current position
-int calculateRotaryPosition()
+int Rotary::calculateRotaryPosition()
 {
     encoder.tick();
 
@@ -58,7 +74,7 @@ int calculateRotaryPosition()
 void Rotary::handle()
 {
     // Handle rotary element
-    int rotaryCurPos = calculateRotaryPosition();
+    int rotaryCurPos = this->calculateRotaryPosition();
     if (rotaryLastPos != rotaryCurPos)
     {
         rotaryLastPos = rotaryCurPos;
