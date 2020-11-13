@@ -168,8 +168,7 @@ void checkAndUpdate()
     // Set the sw version if the current version is not set.
     if (currentVersion == "")
     {
-        String _version = jsonHandler.parameter[VERSION_KEY];
-        String version = _version.c_str();
+        const char *version = jsonHandler.parameter[VERSION_KEY].as<const char *>();
         ESP_LOGI(TAG, "Softwareversion from storage %s", version);
         currentVersion = version;
     }

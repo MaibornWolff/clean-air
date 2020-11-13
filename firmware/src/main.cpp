@@ -203,8 +203,7 @@ void setup()
   ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
   ESP_LOGD(TAG, "fanspeed: %d", jsonHandler.statistics[FAN_SPEED_KEY].as<int>());
   ESP_LOGD(TAG, "operating hours: %lu", jsonHandler.statistics[OPERATING_HOURS_KEY].as<u_long>());
-  String s = (jsonHandler.parameter[VERSION_KEY]);
-  ESP_LOGD(TAG, "version: %s", s.c_str());
+  ESP_LOGD(TAG, "version: %s", jsonHandler.parameter[VERSION_KEY].as<const char *>());
 } // setup
 
 // Loop: Main
