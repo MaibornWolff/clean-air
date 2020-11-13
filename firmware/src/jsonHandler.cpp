@@ -72,13 +72,14 @@ void readFile(String filename, StaticJsonDocument<DOC_SIZE> jsonDoc)
 
 void JsonHandler::loadStatistics()
 {
-    writeFile(STATS_FILE, this->statistics);
+    readFile(STATS_FILE, this->statistics);
 }
 
 void JsonHandler::loadParameter()
 {
-    writeFile(PARAM_FILE, this->parameter);
+    readFile(PARAM_FILE, this->parameter);
 }
+
 void JsonHandler::storeStatistics()
 {
     writeFile(STATS_FILE, this->statistics);
