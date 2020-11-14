@@ -1,0 +1,74 @@
+name: Create release
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.0'
+      - name: get shortsha and tag name
+        id: vars
+        run: |
+         echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+         echo ::set-output name=release_tag::$(echo "$GITHUB_REF" | cut -d / -f 3)
+      # Build firmware
+      - name: Install platformio
+        run: |
+          set -x
+          pip install platformio
+          platformio run -d "${GITHUB_WORKSPACE}/firmware"
+          mv "${GITHUB_WORKSPACE}/firmware/.pio/build/esp32/firmware.bin" "${GITHUB_WORKSPACE}/${{ steps.vars.outputs.sha_short }}.bin"
+          MD5SUM=$(md5sum "${GITHUB_WORKSPACE}/${{ steps.vars.outputs.sha_short }}.bin" | awk '{print $1}')
+          echo "${{ steps.vars.outputs.release_tag }};${{ steps.vars.outputs.sha_short }}.bin;${MD5SUM}" > "${GITHUB_WORKSPACE}/LATEST.github"
+
+      # Upload artifact for further processing
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.vars.outputs.sha_short }}.bin
+          path: |
+            ./${{ steps.vars.outputs.sha_short }}.bin
+            ./LATEST
+      # Create release in Github
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            New release ${{ steps.vars.outputs.release_tag }}
+          draft: false
+          prerelease: false
+      # Upload Asset to Github Release
+      - name: Upload Release Asset
+        id: upload-release-asset-firmware
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./${{ steps.vars.outputs.sha_short }}.bin
+          asset_name: ${{ steps.vars.outputs.sha_short }}.bin
+          asset_content_type: application/octet-stream
+      # Upload LATEST info as release asset
+      - name: Upload Release Asset, LATEST info
+        id: upload-release-asset-LATEST
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./LATEST.github
+          asset_name: LATEST
+          asset_content_type: application/octet-stream
