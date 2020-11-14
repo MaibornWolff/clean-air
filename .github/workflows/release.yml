@@ -1,0 +1,33 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: get shortsha
+        id: vars
+        run: |
+         echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+      - name: Checkout artifact
+        uses: actions/download-artifact@v2
+          with:
+            name: ${{ steps.vars.outputs.sha_short }}.bin
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            New release
+          draft: false
+          prerelease: false
