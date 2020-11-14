@@ -27,7 +27,7 @@ jobs:
           platformio run -d "${GITHUB_WORKSPACE}/firmware"
           mv "${GITHUB_WORKSPACE}/firmware/.pio/build/esp32/firmware.bin" "${GITHUB_WORKSPACE}/${{ steps.vars.outputs.sha_short }}.bin"
           MD5SUM=$(md5sum "${GITHUB_WORKSPACE}/${{ steps.vars.outputs.sha_short }}.bin" | awk '{print $1}')
-          echo "${{ steps.vars.outputs.release_tag }};ARCHIVE/${{ steps.vars.outputs.sha_short }}.bin;${MD5SUM}" > "${GITHUB_WORKSPACE}/LATEST"
+          echo "${{ steps.vars.outputs.release_tag }};${{ steps.vars.outputs.sha_short }}.bin;${MD5SUM}" > "${GITHUB_WORKSPACE}/LATEST.github"
 
       # Upload artifact for further processing
       - name: Upload firmware artifact
@@ -69,6 +69,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./LATEST
+          asset_path: ./LATEST.github
           asset_name: LATEST
           asset_content_type: application/octet-stream
