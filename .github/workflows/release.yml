@@ -1,3 +1,4 @@
+Name: Create release
 on:
   push:
     # Sequence of patterns matched against refs/tags
@@ -15,10 +16,23 @@ jobs:
         id: vars
         run: |
          echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
-      - name: Checkout artifact
-        uses: actions/download-artifact@v2
+      # Install PlatformIO
+      - name: Install platformio
+        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
           with:
-            name: ${{ steps.vars.outputs.sha_short }}.bin
+            python-version: '3.9.0'
+        run: |
+          set -x
+          pip install platformio
+          platformio run -d "${GITHUB_WORKSPACE}/firmware"
+          mv "${GITHUB_WORKSPACE}/firmware/.pio/build/esp32/firmware.bin" "${GITHUB_WORKSPACE}/${{ steps.vars.outputs.sha_short }}.bin"
+      # Upload artifact for further processing
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.vars.outputs.sha_short }}.bin
+          path: ./${{ steps.vars.outputs.sha_short }}.bin
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
