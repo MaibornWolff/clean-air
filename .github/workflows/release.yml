@@ -18,10 +18,11 @@ jobs:
          echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
       # Install PlatformIO
       - name: Install platformio
-        uses: actions/checkout@v2
-        uses: actions/setup-python@v2
-          with:
-            python-version: '3.9.0'
+        uses: 
+          - actions/checkout@v2
+          - actions/setup-python@v2
+              with:
+                python-version: '3.9.0'
         run: |
           set -x
           pip install platformio
