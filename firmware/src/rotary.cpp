@@ -2,6 +2,7 @@
  * Clean Air Rotary. Handles the logic related to the rotary.
  */
 #include "defaults.h"
+#include "jsonHandler.h"
 #include "rotary.h"
 #include <RotaryEncoder.h>
 
@@ -10,27 +11,37 @@
 RotaryEncoder encoder(KY_DT, KY_CLK);
 
 // Last known rotary position.
-int rotaryLastPos = -1;
+int rotaryLastPos;
+
+// Define the JsonHandler.
+extern JsonHandler jsonHandler;
 
 // The callback function to handle changes emitted by the rotary
 CallbackSpeedHandler cbSpeedHandler;
 
-// Configure the rotary.
-void Rotary::configure(CallbackSpeedHandler speedHandler)
+// Constructor.
+void Rotary::setup(JsonHandler handler, CallbackSpeedHandler speedHandler)
 {
     ESP_LOGI(TAG, "Starting to configure rotary.");
 
-    cbSpeedHandler = speedHandler;
-
+    rotaryLastPos = jsonHandler.statistics[FAN_SPEED_KEY].as<int>();
     pinMode(LED_BUILTIN, OUTPUT);
 
-    // Set Rotary default position
-    ESP_LOGI(TAG, "Set rotary default position");
-    encoder.setPosition(ROTARYDEFAULT);
+    jsonHandler = handler;
+    cbSpeedHandler = speedHandler;
+
+    if (rotaryLastPos <= 0)
+    {
+        rotaryLastPos = ROTARYMAX;
+    }
+
+    encoder.tick();
+    encoder.setPosition((ROTARYMAX - rotaryLastPos) / ROTARYSTEPS);
+    cbSpeedHandler(rotaryLastPos);
 }
 
 // Handle the rotary element: Check the position and return the current position
-int calculateRotaryPosition()
+int Rotary::calculateRotaryPosition()
 {
     encoder.tick();
 
@@ -54,6 +65,12 @@ int calculateRotaryPosition()
     return newPos;
 } // calculateRotaryPosition
 
+void updateRotaryPosition(int position)
+{
+    jsonHandler.statistics[FAN_SPEED_KEY] = position;
+    jsonHandler.storeStatistics();
+}
+
 // Reacts on changes of knobs rotation.
 void Rotary::handle()
 {
@@ -63,6 +80,9 @@ void Rotary::handle()
     {
         rotaryLastPos = rotaryCurPos;
         cbSpeedHandler(rotaryLastPos);
+
+        updateRotaryPosition(rotaryLastPos);
+
         ESP_LOGV(TAG, "%d", rotaryCurPos);
     } // if
 }

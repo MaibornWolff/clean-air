@@ -1,20 +1,19 @@
 /**
  * Clean Air Update Service.
  */
-#include <EEPROM.h>
 #include <FS.h>
 #include <HTTPClient.h>
 #include <Update.h>
 #include "updateService.h"
 #include "defaults.h"
-#include "json_handler.h"
+#include "jsonHandler.h"
 
 // Variables
 // The unit of time during which the last check for an update has taken place. Is dependent on the update interval.
-int lastCheckedAt = -1;
+u_long lastHourCheckedAt = 0;
 
 // The storage accounts baseurl. Currently just something to test with and to have a backup url.
-String base_url = DEFAULT_BASE_URL;
+String base_url = FALLBACK_BASE_URL;
 
 // The currently installed software version.
 String currentVersion = "";
@@ -22,7 +21,13 @@ String currentVersion = "";
 // Some httpClient.
 HTTPClient httpClient;
 
-extern json_handler param_json;
+// The Jsonfile containing the saved version
+extern JsonHandler jsonHandler;
+
+void UpdateService::setup(JsonHandler handler)
+{
+    jsonHandler = handler;
+}
 
 // Extracts the latest software version from given string.
 String extractLatestVersion(String content)
@@ -122,6 +127,7 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     WiFiClient *client = httpClient.getStreamPtr();
     size_t written = Update.writeStream(*client);
     ESP_LOGI(TAG, "OTA: %d/%d bytes written.\n", written, contentLength);
+
     if (written != contentLength)
     {
         ESP_LOGE(TAG, "Wrote partial binary. Giving up.");
@@ -137,8 +143,10 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     if (Update.isFinished())
     {
         ESP_LOGI(TAG, "Update successfully completed. Storing software version (%s), reboot afterwards.", version);
-        param_json.json_doc[VERSION_KEY] = version;
-        param_json.dump_json(PARAM_FILE);
+
+        jsonHandler.parameter[VERSION_KEY] = version;
+        jsonHandler.storeParameter();
+
         // This line is specific to the ESP32 platform:
         ESP.restart();
     }
@@ -160,12 +168,15 @@ void checkAndUpdate()
     // Set the sw version if the current version is not set.
     if (currentVersion == "")
     {
-        const char version = param_json.json_doc[VERSION_KEY];
+        const char *version = jsonHandler.parameter[VERSION_KEY].as<const char *>();
+        ESP_LOGI(TAG, "Softwareversion from storage %s", version);
         currentVersion = version;
     }
     // Starts the actual update if the versions differ.
     if (currentVersion != polledVersion)
     {
+        ESP_LOGI(TAG, "Softwareversion in devicestate %s", currentVersion);
+        ESP_LOGI(TAG, "Softwareversion from blobstorage %s", polledVersion);
         downloadAndUpdate(polledVersion, polledFilename, expectedMD5Hash);
     }
     else
@@ -178,13 +189,13 @@ void checkAndUpdate()
 void UpdateService::checkAndUpdateSoftware()
 {
     // The # units since the device has started.
-    int upTime = round(millis() / UPDATE_INTERVAL_IN_MS);
+    u_long upTime = round(millis() / UPDATE_INTERVAL_IN_MS);
 
-    if (upTime != lastCheckedAt)
+    if (upTime != lastHourCheckedAt)
     {
         ESP_LOGI(TAG, "A day has passed. Starting to check for updates. Currently running on software with version: %s", currentVersion);
 
-        lastCheckedAt = upTime;
+        lastHourCheckedAt = upTime;
         checkAndUpdate();
     }
 }

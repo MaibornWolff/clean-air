@@ -3,6 +3,7 @@
  */
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+
 #include <AutoConnect.h>
 #include <FS.h>
 #include <LITTLEFS.h>
@@ -12,12 +13,15 @@
 #include "Arduino.h"
 #include "debug.h"
 #include "defaults.h"
+#include "esp_log.h"
 #include "fanController.h"
 #include "json.h"
+#include "jsonHandler.h"
 #include "rotary.h"
+#include "operationHourCounter.h"
 #include "updateService.h"
-#include "esp_log.h"
-#include "json_handler.h"
+
+void setFanSpeed(int speed);
 
 // Variables
 // ota URL
@@ -27,29 +31,20 @@ boolean otaUrlConfigured = false;
 // Set in setup() if we fall to offline mode
 boolean offlineMode = false;
 
-// we started here
-unsigned long bootTime = millis();
-// Wifi check
-unsigned long previousCheckWifi = bootTime;
-// check for updating operating hours
-unsigned long previousCheckOperatingHours = bootTime;
+// Define the jsonHandler.
+JsonHandler jsonHandler;
 
-// operating statistics
-struct statsData
-{
-  int operatingHours;
-};
+// Define the statisticsHandler.
+OperationHourCounter operationHourCounter;
 
-statsData stats;
-
-// Define custom update service.
-UpdateService updateService;
+// Define the fans controller.
+FanController fanController;
 
 // Define the adpter to handle hardware related io things.
 Rotary rotary;
 
-// Define the fans controller.
-FanController fanController;
+// Define custom update service.
+UpdateService updateService;
 
 // Define webserver variable and tell autoconnect to use it
 WebServer Server;
@@ -62,9 +57,6 @@ AutoConnectConfig WifiConfig;
 AutoConnectCredential WifiCredentials;
 AutoConnectAux otaSetting;
 AutoConnectAux otaSave;
-
-json_handler param_json;
-json_handler stats_json;
 
 // Webserver: serve a default page
 void rootPage()
@@ -87,36 +79,29 @@ void getParams()
   otaUrl = otaSetting.getElement<AutoConnectInput>(OTA_URL_KEY).value;
   otaUrlConfigured = true;
   otaUrl.trim();
+  jsonHandler.parameter[OTA_URL_KEY] = otaUrl;
   updateService.setServerUrl(otaUrl);
 }
 
 // Load parameter from eeprom fs
-void loadParams()
+void loadOtaUrl()
 {
   // Load the elements with parameters
-  param_json.read_file(PARAM_FILE);
-  const char *url = param_json.json_doc[OTA_URL_KEY];
+  const char *url = jsonHandler.parameter[OTA_URL_KEY];
   otaUrl = url;
   if (otaUrl != "")
   {
     otaSetting.setElementValue(OTA_URL_KEY, otaUrl);
     getParams();
+    updateService.setServerUrl(otaUrl);
   }
 } // loadParams
-
-// Save parameter to eeprom
-void saveParams()
-{
-  otaUrl = otaSetting.getElement<AutoConnectInput>(OTA_URL_KEY).value;
-  param_json.json_doc[OTA_URL_KEY] = otaUrl;
-  param_json.dump_json(PARAM_FILE);
-} // saveParams
 
 // Handler for custom webpage, needed to save data to eeprom
 String onSave(AutoConnectAux &aux, PageArgument &args)
 {
   getParams();
-  saveParams();
+  jsonHandler.storeParameter();
   return "Saved";
 }
 
@@ -141,13 +126,7 @@ void configureNetwork()
     WifiConfig.autoRise = true; // autorise must be true if we want to enter CP mode
     ESP_LOGI(TAG, "Rotary button pressed. Will start config AP and CP");
   }
-  /*
-  else if (WifiCredentials.entries() == 0) // Check configured Wifi Credential entries
-  {
-    ESP_LOGW(TAG, ""Found no wifi credentials. Assuming offline mode");
-    offlineMode = true;
-  }
-  */
+
   ESP_LOGD(TAG, "WiFi connections: %d", WifiCredentials.entries());
 
   WifiConfig.autoReconnect = true;
@@ -163,7 +142,7 @@ void configureNetwork()
 
   // Load and set the custom configuration web page for ota updates
   otaSetting.load(otaSettingPage);
-  loadParams();
+  loadOtaUrl();
   otaSetting.menu(true);
   otaSave.load(otaSavePage);
   otaSave.on(onSave);  // custom handler when this site is called
@@ -190,7 +169,6 @@ void configureNetwork()
       offlineMode = true;
     }
   }
-  LITTLEFS.end();
 
   ESP_LOGD(TAG, "Configure Wifi: complete");
 }
@@ -199,23 +177,6 @@ void configureNetwork()
 void setFanSpeed(int speed)
 {
   fanController.setSpeed(speed);
-}
-
-void initStats()
-{
-  stats_json.read_file(STATS_FILE);
-
-  int opHours = stats_json.json_doc[OPERATING_HOURS_KEY];
-  if (opHours)
-  {
-    ESP_LOGD(TAG, "Operating hours retrieved from file: %d", opHours);
-    stats.operatingHours = opHours;
-  }
-  else
-  {
-    stats.operatingHours = 0;
-    ESP_LOGD(TAG, "Operating hours apparently not stored yet. Assuming a value of 0.");
-  }
 }
 
 // Setup: Called once at bootup
@@ -228,42 +189,33 @@ void setup()
 
   ESP_LOGI(TAG, "Setup initiated");
 
-  rotary.configure(setFanSpeed);
-  fanController.configure();
+  // Define the jsonHandler.
+  jsonHandler.setup();
+  operationHourCounter.setup(jsonHandler);
+  fanController.setup();
+  rotary.setup(jsonHandler, setFanSpeed);
+  updateService.setup(jsonHandler);
 
   configureNetwork();
-
-  initStats();
 
   ESP_LOGI(TAG, "Setup complete %s", TAG);
   ESP_LOGD(TAG, "offlineMode: %d", offlineMode);
   ESP_LOGD(TAG, "otaUrlConfigured: %d", otaUrlConfigured);
-  ESP_LOGD(TAG, "otaUrl: %s", otaUrl);
-
+  ESP_LOGD(TAG, "fanspeed: %d", jsonHandler.statistics[FAN_SPEED_KEY].as<int>());
+  ESP_LOGD(TAG, "operating hours: %lu", jsonHandler.statistics[OPERATING_HOURS_KEY].as<u_long>());
+  ESP_LOGD(TAG, "version: %s", jsonHandler.parameter[VERSION_KEY].as<const char *>());
 } // setup
 
 // Loop: Main
 void loop()
 {
-  // WIFI check, includes connection check and update check
-  if (millis() - previousCheckWifi > CHECK_WIFI_INTERVAL)
+  if (WiFi.status() == WL_CONNECTED)
   {
-    if (WiFi.status() == WL_CONNECTED)
-    {
-      // Check if new a new update is available.
-      updateService.checkAndUpdateSoftware();
-    }
-    previousCheckWifi = millis();
+    // Check if new a new update is available.
+    updateService.checkAndUpdateSoftware();
   }
 
-  if (millis() - previousCheckOperatingHours > UPDATE_OPERATING_HOURS_INTERVAL)
-  {
-    previousCheckOperatingHours = millis();
-    stats.operatingHours++;
-    ESP_LOGV(TAG, "Uptime: %d ms, total operating time: %d h.", millis() - bootTime, stats.operatingHours);
-    stats_json.json_doc[OPERATING_HOURS_KEY] = stats.operatingHours;
-    stats_json.dump_json(STATS_FILE);
-  }
+  operationHourCounter.countOperationHours();
 
   // Handle clients
   Portal.handleClient();

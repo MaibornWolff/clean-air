@@ -1,8 +1,9 @@
 #include "Arduino.h"
 #include "fanController.h"
+#include "rotary.h"
 
 // The fans target speed.
-int fanSpeedToRunAt = -1;
+int fanSpeedToRunAt;
 
 // The speed of fan 1.
 int fan_1_speed = -1;
@@ -20,15 +21,11 @@ int fan_4_speed = -1;
 void (*localSpeedHandler)(int, int, int, int);
 
 // Configure fan related stuff during setup.
-void FanController::configure(/*void (*speedHandler)(int, int, int, int)*/)
+void FanController::setup(/*void (*speedHandler)(int, int, int, int)*/)
 {
     //localSpeedHandler = speedHandler;
-
     ledcAttachPin(FAN_PWM, 0);
     ledcSetup(0, FAN_FREQ, FAN_RES);
-
-    //Set fan speed to 100% to ensure good ventilation during a possible calibration process
-    fanSpeedToRunAt = 255;
 }
 
 // TODO: this needs to run on a different thread to be able to constantly monitor the fans speed
