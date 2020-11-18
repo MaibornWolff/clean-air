@@ -56,11 +56,3 @@ describes the amount required of each part.
 - Wood/Metal drills (and electric screwdriver/o.e.)
 
 ### How to build it
-
-#### Large Device
-
-#### Small Device
-
-### Electronic Setup
-
-### ESP Control Unit
