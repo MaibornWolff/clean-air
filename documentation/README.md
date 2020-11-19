@@ -8,7 +8,7 @@ The documentation covers all information around the UV-C clean air units.
 
 ### Small 3d printed model
 
-The small 3d printed model is a UV-C cleaner with 2 lamps.
+The small 3d printed model is a UV-C cleaner with up to 4 lamps and up to 8 fans. Based on our calculations the small device is capable of handling rooms with a size of up to 25,3m² (assuming 2.5m ceiling height), using 4x 55W UV-C lamps and fans with a total throughput of 380m³/h.
 
 See [3d model documentation](3dmodel.md).
 
