@@ -50,7 +50,7 @@ We will not build our own "MaibornWolff Air Cleaner" unit and sell it. We have n
 
 ### What license are you using?
 
-The code and documentation is licensed under the [MIT](LICENSE.md) license. The hardware documentation, build plans and 3d files are licensed under the [Creative Commons Attribution 3.0 Unported](cc-by-sa-3.0-unported.txt) license.
+The code and documentation is licensed under the [MIT](LICENSE) license. The hardware documentation, build plans and 3d files are licensed under the [Creative Commons Attribution 3.0 Unported](cc-by-sa-3.0-unported.txt) license.
 
 ### How can I help?
 
