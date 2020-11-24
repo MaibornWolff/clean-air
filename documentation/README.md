@@ -4,6 +4,10 @@ The documentation covers all information around the UV-C clean air units.
 
 ## DIY Hardware
 
+### Calculations
+
+The effiency calculation can be found [here](theory.pdf).
+
 ### Electronics
 
 ### Small 3d printed model
