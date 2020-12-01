@@ -6,7 +6,7 @@ The documentation covers all information around the UV-C clean air units.
 
 ### Calculations
 
-The effiency calculation can be found [here](theory.pdf).
+Estimations about the irradiance and considerations about the room size for which such a device could be feasible are located [here](theory.pdf).
 
 ### Electronics
 
