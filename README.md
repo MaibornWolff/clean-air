@@ -30,7 +30,7 @@ Here are some reading information sources, if you want to read up on various opi
 - https://www.cuimc.columbia.edu/news/far-uvc-light-safely-kills-airborne-coronaviruses
 - https://pubmed.ncbi.nlm.nih.gov/32547908/
 
-We also have a [calculation (PDF)](documentation/theory.pdf) of the theoretical effiency of the clean air device.
+We estimated the irradiance inside the device as described in the [calculation (PDF)](documentation/theory.pdf).
 
 ## Getting started
 
