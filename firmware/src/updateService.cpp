@@ -2,7 +2,6 @@
  * Clean Air Update Service.
  */
 #include <FS.h>
-#include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <Update.h>
 #include "updateService.h"
