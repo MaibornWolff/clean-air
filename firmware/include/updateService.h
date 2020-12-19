@@ -1,7 +1,7 @@
 #include "jsonHandler.h"
 
 // The interval to check for updates in milliseconds. Currently set to 24h.
-const int UPDATE_INTERVAL_IN_MS = 86400000;
+const int UPDATE_INTERVAL_IN_HOURS = 24;
 
 // The filename which contains the list of versions.
 const String FILENAME_LATEST = "LATEST";
