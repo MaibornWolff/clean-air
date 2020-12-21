@@ -8,9 +8,18 @@
 #include "defaults.h"
 #include "jsonHandler.h"
 
+struct HttpClientAndResult
+{
+    HTTPClient *httpClient;
+    int statusCode;
+};
+
 // Variables
 // The unit of time during which the last check for an update has taken place. Is dependent on the update interval.
 u_long lastHourCheckedAt = 0;
+
+// The header to fetch.
+const char *headerKeys[] = {"location"};
 
 // The storage accounts baseurl. Currently just something to test with and to have a backup url.
 String base_url = FALLBACK_BASE_URL;
@@ -68,20 +77,46 @@ const char *extractHash(String content)
     return (content.substring(startIndex, endIndex)).c_str();
 }
 
-// Requests the latest version from the server (blobstorage)
-String getLatestVersionFromServer()
+HttpClientAndResult ToFinalRedirection(String location)
 {
-    httpClient.begin(base_url + FILENAME_LATEST);
+    httpClient.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+    httpClient.setReuse(false);
+    httpClient.begin(location);
+    httpClient.collectHeaders(headerKeys, 1);
+
     int statusCode = httpClient.GET();
+
+    if (statusCode >= 300 && statusCode < 400)
+    {
+        if (httpClient.hasHeader("location"))
+        {
+            String newLocation = httpClient.header("location");
+            httpClient.end();
+
+            ESP_LOGI(TAG, "%s", newLocation.c_str());
+            return ToFinalRedirection(newLocation);
+        }
+    }
+    else
+    {
+        return {httpClient : &httpClient, statusCode : statusCode};
+    }
+}
+
+// Requests the latest version from the server (blobstorage)
+String getLatestVersionFromServer(String location)
+{
+    HttpClientAndResult result = ToFinalRedirection(location);
+
     String content = "";
 
-    switch (statusCode)
+    switch (result.statusCode)
     {
     case 200:
-        content = httpClient.getString();
+        content = (*result.httpClient).getString();
         if (content != "")
         {
-            ESP_LOGI(TAG, "Successfully requested the latest software version.");
+            ESP_LOGI(TAG, "Successfully requested the latest software version. %s", content.c_str());
             break;
         }
 
@@ -91,10 +126,11 @@ String getLatestVersionFromServer()
         ESP_LOGE(TAG, "Received statuscode 404. File may have been moved or deleted. Cannot check for latest software.");
         break;
     default:
-        ESP_LOGE(TAG, "Could not check for latest software version due to unknown reason.\nI received the status code %d\nURL: %s%s", statusCode, base_url, FILENAME_LATEST);
+        ESP_LOGE(TAG, "Could not check for latest software version due to unknown reason.\nI received the status code %d\nURL: %s%s", result.statusCode, base_url.c_str(), FILENAME_LATEST.c_str());
         break;
     }
 
+    (*result.httpClient).end();
     return content;
 }
 
@@ -103,12 +139,11 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
 {
     ESP_LOGI(TAG, "Starting to download new software version, downloading file with name: %s", filename);
 
-    httpClient.begin(base_url + filename);
-    int statusCode = httpClient.GET();
+    HttpClientAndResult result = ToFinalRedirection(base_url + filename);
 
-    if (statusCode != 200)
+    if (result.statusCode != 200)
     {
-        ESP_LOGE(TAG, "Could not check for latest software version due to unknown reason.\n I received the status code %d\nURL: %s%s", statusCode, base_url, filename);
+        ESP_LOGE(TAG, "Could not check for latest software version due to unknown reason.\n I received the status code %d\nURL: %s%s", result.statusCode, base_url.c_str(), filename.c_str());
         return;
     }
 
@@ -117,14 +152,14 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
         Update.setMD5(md5Hash);
     }
 
-    int contentLength = httpClient.getSize();
+    int contentLength = (*result.httpClient).getSize();
     if (!Update.begin(contentLength))
     {
         ESP_LOGE(TAG, "Could not update to latest software because there is not enough space available!");
         return;
     }
 
-    WiFiClient *client = httpClient.getStreamPtr();
+    WiFiClient *client = (*result.httpClient).getStreamPtr();
     size_t written = Update.writeStream(*client);
     ESP_LOGI(TAG, "OTA: %d/%d bytes written.\n", written, contentLength);
 
@@ -136,13 +171,13 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
 
     if (!Update.end())
     {
-        ESP_LOGE(TAG, "Error from Update.end(): %s", String(Update.getError()));
+        ESP_LOGE(TAG, "Error from Update.end(): %s", String(Update.getError()).c_str());
         return;
     }
 
     if (Update.isFinished())
     {
-        ESP_LOGI(TAG, "Update successfully completed. Storing software version (%s), reboot afterwards.", version);
+        ESP_LOGI(TAG, "Update successfully completed. Storing software version (%s), reboot afterwards.", version.c_str());
 
         jsonHandler.parameter[VERSION_KEY] = version;
         jsonHandler.storeParameter();
@@ -152,7 +187,7 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
     }
     else
     {
-        ESP_LOGE(TAG, "Error from Update.isFinished(): %s", String(Update.getError()));
+        ESP_LOGE(TAG, "Error from Update.isFinished(): %s", String(Update.getError()).c_str());
         return;
     }
 }
@@ -160,23 +195,32 @@ void downloadAndUpdate(String version, String filename, const char *md5Hash)
 // Check if the current version differs from the polled version.
 void checkAndUpdate()
 {
-    String polledContent = getLatestVersionFromServer();
+    String polledContent = getLatestVersionFromServer(base_url + FILENAME_LATEST);
     String polledVersion = extractLatestVersion(polledContent);
+
+    if (polledVersion == "")
+    {
+        ESP_LOGW(TAG, "Could not fetch latest version from Server. Stopping Check.");
+        return;
+    }
+
     String polledFilename = extractFilename(polledContent);
     const char *expectedMD5Hash = extractHash(polledContent);
 
     // Set the sw version if the current version is not set.
     if (currentVersion == "")
     {
-        const char *version = jsonHandler.parameter[VERSION_KEY].as<const char *>();
-        ESP_LOGI(TAG, "Softwareversion from storage %s", version);
+        String version = jsonHandler.parameter[VERSION_KEY].as<String>();
+
+        ESP_LOGI(TAG, "Softwareversion from storage %s", version.c_str());
         currentVersion = version;
     }
+
     // Starts the actual update if the versions differ.
     if (currentVersion != polledVersion)
     {
-        ESP_LOGI(TAG, "Softwareversion in devicestate %s", currentVersion);
-        ESP_LOGI(TAG, "Softwareversion from blobstorage %s", polledVersion);
+        ESP_LOGI(TAG, "Softwareversion in devicestate %s", currentVersion.c_str());
+        ESP_LOGI(TAG, "Softwareversion from blobstorage %s", polledVersion.c_str());
         downloadAndUpdate(polledVersion, polledFilename, expectedMD5Hash);
     }
     else
@@ -189,13 +233,13 @@ void checkAndUpdate()
 void UpdateService::checkAndUpdateSoftware()
 {
     // The # units since the device has started.
-    u_long upTime = round(millis() / UPDATE_INTERVAL_IN_MS);
+    u_long opHours = jsonHandler.statistics[OPERATING_HOURS_KEY].as<u_long>();
 
-    if (upTime != lastHourCheckedAt)
+    if ((opHours % UPDATE_INTERVAL_IN_HOURS) == 0 && lastHourCheckedAt != opHours)
     {
-        ESP_LOGI(TAG, "A day has passed. Starting to check for updates. Currently running on software with version: %s", currentVersion);
+        ESP_LOGI(TAG, "Update intervall has passed. Starting to check for updates. Currently running on software with version: %s", currentVersion.c_str());
 
-        lastHourCheckedAt = upTime;
+        lastHourCheckedAt = opHours;
         checkAndUpdate();
     }
 }
