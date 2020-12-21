@@ -30,6 +30,8 @@ Here are some reading information sources, if you want to read up on various opi
 - https://www.cuimc.columbia.edu/news/far-uvc-light-safely-kills-airborne-coronaviruses
 - https://pubmed.ncbi.nlm.nih.gov/32547908/
 
+We estimated the irradiance inside the device as described in the [calculation (PDF)](documentation/theory.pdf).
+
 ## Getting started
 
 In order to get started you have to decide if you want to build the large device or the small one. The large is device is mostly build by hand where the smaller one can be 3D-printed.

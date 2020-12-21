@@ -4,6 +4,10 @@ The documentation covers all information around the UV-C clean air units.
 
 ## DIY Hardware
 
+### Calculations
+
+Estimations about the irradiance and considerations about the room size for which such a device could be feasible are located [here](theory.pdf).
+
 ### Electronics
 
 ### Small 3d printed model
