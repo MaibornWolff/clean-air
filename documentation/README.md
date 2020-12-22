@@ -37,7 +37,7 @@ The high voltage part is more dependent on the inverter as well as the plugs you
 
 ## Software
 
-Use a tool like e.g. [ESPHome-Flasher](https://github.com/esphome/esphome-flasher) to flash the latest release onto your Wemos. IF you'd like to build the software yourself, the Building section.
+Use a tool like e.g. [ESPHome-Flasher](https://github.com/esphome/esphome-flasher) to flash the latest release onto your Wemos. If you'd like to build the software yourself, go to the Building section.
 
 ### Building
 

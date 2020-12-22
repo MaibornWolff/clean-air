@@ -11,8 +11,9 @@ The large device consists of 6 36W UV-C lamps in a flight case with extra space 
 
 ### 3D printable Version
 
-<img alt="3D printable Clean Air Device" src="documentation/images/3d_printable/side_view.jpg" width="400" />
-<img alt="3D printable Clean Air Device" src="documentation/images/3d_printable/fan_view.jpg" width="400" />
+<img alt="3D printable Clean Air Device" src="documentation/images/3d_printable/main_view.jpg" width="400" />
+<img alt="3D printable Clean Air Device" src="documentation/images/3d_printable/front_view_3.jpg" width="400" />
+<img alt="3D printable Clean Air Device" src="documentation/images/3d_printable/top_view_1.jpg" width="400" />
 
 ## Why would I need this (what is the purpose)?
 
