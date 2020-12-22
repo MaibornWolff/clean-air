@@ -18,7 +18,7 @@ See [3D model documentation](3dmodel.md).
 
 The wooden device is a full sized DIY case, specced with 6 UV-C lamps and 4 fans.
 
-See [wooden model documentation](/hardware/all_wood/README.md).
+See [wooden model documentation](allWoodModel.md).
 
 ### Electronics
 
