@@ -25,7 +25,7 @@ Those mounts can either be cut with a CNC, 3d printed or carved with hand tools.
 | ---------- | ----------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | 4          | 140mm PWM fan                       | Noctua NF-A14             | [amazon.de](https://www.amazon.de/-/en/Noctua-NF-A14-PWM-case-fan/dp/B00CP6QLY6)                            |
 | 1          | 12V DC Supply                       |                           | [amazon.de](https://www.amazon.de/-/en/Innovate-Transformer-12-24-Driver-Supply/dp/B01AALEXS8)              |
-| 6          | UV-C 36W desinfection lamp          | Philips TUV PL-L 36W      | [amazon.de](https://www.amazon.de/-/en/Philips-PLL36-865-2G11-6500K/dp/B0019CG6D8)                          |
+| 6          | UV-C 36W disinfection lamp          | Philips TUV PL-L 36W      | [amazon.de](https://www.amazon.de/-/en/Philips-PLL36-865-2G11-6500K/dp/B0019CG6D8)                          |
 | 3          | Electric ballast                    | Philips EVG HF-S 2x 36 W  | [amazon.de](https://www.amazon.de/-/en/Philips-Electronic-Ballast-Fluorescent-Compact/dp/B00OTXR71E/)       |
 | 6          | lamp holder                         | 2g11                      | [amazon.de](https://www.amazon.de/-/en/Vossloh-Assembly-Frame-Mount-2G11-PL/dp/B0018LGB4E)                  |
 | 6          | lamp clips                          |                           | [amazon.de](https://www.amazon.de/-/en/Houben-101393-mechanical-accessory-4014364013947/dp/B000ONOQF8)      |
