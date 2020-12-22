@@ -24,8 +24,8 @@ void (*localSpeedHandler)(int, int, int, int);
 void FanController::setup(/*void (*speedHandler)(int, int, int, int)*/)
 {
     //localSpeedHandler = speedHandler;
-    ledcAttachPin(FAN_PWM, 0);
-    ledcSetup(0, FAN_FREQ, FAN_RES);
+    ledcAttachPin(FAN_PWM, FAN_MAIN_CHANNEL);
+    ledcSetup(FAN_MAIN_CHANNEL, FAN_FREQ, FAN_RES);
 }
 
 // TODO: this needs to run on a different thread to be able to constantly monitor the fans speed
@@ -37,6 +37,6 @@ void FanController::emitFanSpeed()
 // Set fan speed in percent - 0 is off, 1-100 is minimum to maximum speed
 void FanController::setSpeed(int speed)
 {
-    ledcWrite(0, speed);
+    ledcWrite(FAN_MAIN_CHANNEL, speed);
     fanSpeedToRunAt = speed;
 }
