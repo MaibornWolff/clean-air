@@ -59,7 +59,8 @@ describes the amount required of each part. All other non-3D-printable parts are
 
 ### Electronic Setup
 
-Wire up the low voltaage part like that:
-![Low voltage schematics](hardware/DC_schematics.png)
+Wire up the low voltage part like that:
+
+![Low voltage schematics](/hardware/DC_schematics.png)
 
 ### ESP Control Unit
