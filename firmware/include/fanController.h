@@ -4,6 +4,7 @@
 // PWM configuration
 #define FAN_FREQ 25000
 #define FAN_RES 8
+#define FAN_MAIN_CHANNEL 1
 
 const int FAN_SPEED_1 = -1;
 const int FAN_SPEED_2 = -1;

@@ -18,7 +18,7 @@ describes the amount required of each part. All other non-3D-printable parts are
 | 1   | 12V PSU                     |                                                                         | [amazon.de](https://www.amazon.de/gp/product/B00A9UP8P8/)                                                                                                                                                                                                     | 17,99       |
 | 1/2 | UVC Mount                   |                                                                         | [amazon.de](https://www.amazon.de/gp/product/B0018LGB4E/)                                                                                                                                                                                                     | 4,96        |
 | 2/4 | UVC Lamp 55W                | can be adjusted to up to 95W                                            | [amazon.de](https://www.amazon.de/gp/product/B002VLGJOW/)                                                                                                                                                                                                     | 19,13       |
-| 1   | 5V PSU                      |                                                                         | [amazon.de](https://www.amazon.de/gp/product/B079138QY1/)                                                                                                                                                                                                     | 8,46        |
+| 1   | 5V PSU                      | Optional, a 12v to 5v converter can also be used                        | [amazon.de](https://www.amazon.de/gp/product/B079138QY1/)                                                                                                                                                                                                     | 8,46        |
 | 1   | AC Plug with fuse           |                                                                         | [amazon.de](https://www.amazon.de/gp/product/B01FQVM9EM/)                                                                                                                                                                                                     | 6,99        |
 | 4/8 | 12V 92mm PWM Fan            | either use only 4 in the front or 4 in the front and 4 in the back      | [amazon.de](https://www.amazon.de/ARCTIC-F9-PWM-Standardgeh%C3%A4use-L%C3%BCfterdrehzahl/dp/B00H3SVWF4/) / [mindfactory.de](https://www.mindfactory.de/product_info.php/Titan-TFD-9225H12ZP-KE-RB--92x92x25mm-2700-U-min-10-25-dB-A--schwarz-we_1030365.html) | 3,60 / 9.02 |
 | 1   | ESP32 Mini                  |                                                                         | [amazon.de](https://www.amazon.de/AZDelivery-Bluetooth-Internet-Entwicklungsboard-kompatibel/dp/B08BTRQNB3/)                                                                                                                                                  | 8,99        |
@@ -58,5 +58,9 @@ describes the amount required of each part. All other non-3D-printable parts are
 ### How to build it
 
 ### Electronic Setup
+
+Wire up the low voltage part like that:
+
+![Low voltage schematics](/hardware/DC_schematics.png)
 
 ### ESP Control Unit
