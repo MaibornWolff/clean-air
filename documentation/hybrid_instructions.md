@@ -7,15 +7,20 @@
 ## Preparation
 
 
-## Step 1 PCB and low-voltage electronics
-Solder all conectors, the temperature sensor, esp32 dev board and dcdc module to the pcb. 
-Mount the pcb in the case using 4 m3 screws. The LEDs have to face the light channels. Connect the ky-040 encoder to the mainboards "encoder" headers using 5 ff jumper wires.
+## Step 1
 
-## Step 2 Electronics
+<p align="center">
+  <a href="url"><img src="/documentation/images/gif1.gif" width="80%"></a>
+</p>
 
-## Step 3 Fan and lights
+## Step 2
 
-## Step 4 Assembly
+<p align="center">
+  <a href="url"><img src="/documentation/images/gif2.gif" width="80%"></a>
+</p>
 
+## Step 3
 
-
+<p align="center">
+  <a href="url"><img src="/documentation/images/gif3.gif" width="80%"></a>
+</p>
